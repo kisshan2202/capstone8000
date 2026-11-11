@@ -58,11 +58,13 @@
 
   <h2 class="section" id="add">Add an Idea</h2>
   <form id="idea-form">
+    <input type="hidden" id="idea-id">
     <label>Your name <input id="idea-author" required maxlength="60"></label>
     <label>Idea title <input id="idea-title" required maxlength="100"></label>
     <label>Description <textarea id="idea-desc" required maxlength="1000"></textarea></label>
-    <div><button class="primary" type="submit">Submit idea on GitHub</button></div>
-    <p class="empty" id="idea-help">Submitting copies your idea and opens the <code>ideas</code> file on GitHub. Paste at the end of the file and commit; it then appears here as a card.</p>
+    <div><button class="primary" type="submit" id="idea-submit">Add idea</button>
+         <button class="ghost" type="button" id="idea-cancel" hidden>Cancel edit</button></div>
+    <p class="empty" id="idea-status" role="status"></p>
   </form>
 </main>
 
@@ -71,7 +73,8 @@
   <a href="https://github.com/kisshan2202/capstone8000">View on GitHub</a>
 </footer>
 
-<script>
+<script type="module">
+
 // ---- Team profiles: loaded from the "details" file in this repo ----
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $ = id => document.getElementById(id);
@@ -121,53 +124,84 @@ fetch("details", { cache:"no-store" })
   .then(t => renderProfiles(parseDetails(t)))
   .catch(() => { $("profiles").innerHTML = '<p class="empty">Could not load the details file.</p>'; });
 
-// ---- Ideas: loaded from the "ideas" file in this repo ----
-const REPO_EDIT = "https://github.com/kisshan2202/capstone8000/edit/main/ideas";
-const IDEA_KEYS = { "title":"title", "author":"author", "description":"desc" };
+// ---- Ideas: shared live via Firebase Realtime Database (profiles above work even if this fails) ----
+let fb = null;
+try {
+  const [a, d] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js")
+  ]);
+  fb = { ...a, ...d };
+} catch {}
+if (!fb) {
+  $("ideas-grid").innerHTML = '<p class="empty">Could not load the ideas service.</p>';
+} else {
+  const { initializeApp, getDatabase, ref, onValue, push, set, update, remove } = fb;
+  const app = initializeApp({
+    apiKey: "AIzaSyAJSUcbcb0g55rzYdgClliC1lPBpIkRdvc",
+    authDomain: "ironpeak-crm-1860093.firebaseapp.com",
+    databaseURL: "https://ironpeak-crm-1860093-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "ironpeak-crm-1860093",
+    appId: "1:336525024774:web:e6193da47404d8bf672d87"
+  });
+  const db = getDatabase(app);
+  const ideasRef = ref(db, "capstone8000_ideas");   // only this path is used by this site
+  let ideas = [];
 
-function parseIdeas(text) {
-  const out = []; let cur = null, field = null;
-  for (const raw of text.replace(/\r/g, "").split("\n")) {
-    if (!raw.trim() || raw.trim().startsWith("#")) continue;
-    const m = /^(\S[^:]*?)\s*:\s*(.*)$/.exec(raw);
-    const key = m && IDEA_KEYS[m[1].trim().toLowerCase()];
-    if (key) {
-      if (key === "title") { cur = { title:"", author:"", desc:"" }; out.push(cur); }
-      if (!cur) continue;
-      field = key; cur[key] = m[2].trim();
-    } else if (cur && field) cur[field] += "\n" + raw.trim();
+  function renderIdeas() {
+    $("ideas-grid").innerHTML = ideas.length ? ideas.map(i => `
+      <article class="card idea">
+        <div class="card-head"><h3>${esc(i.title)}</h3></div>
+        <div class="body">${esc(i.desc).replace(/\n/g,"<br>")}<div class="by">Idea by ${esc(i.author || "Anonymous")}</div></div>
+        <div class="actions">
+          <button class="ghost" data-edit="${esc(i.id)}">Edit</button>
+          <button class="danger" data-del="${esc(i.id)}">Delete</button>
+        </div>
+      </article>`).join("") : '<p class="empty">No ideas yet. Be the first to add one below!</p>';
   }
-  return out.filter(i => i.title);
+
+  onValue(ideasRef, snap => {
+    const v = snap.val() || {};
+    ideas = Object.entries(v).map(([id, d]) => ({ id, ...d })).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    renderIdeas();
+  }, () => { $("ideas-grid").innerHTML = '<p class="empty">Could not load ideas. Check the database rules.</p>'; });
+
+  const status = msg => { $("idea-status").textContent = msg; };
+  function resetForm() {
+    $("idea-form").reset(); $("idea-id").value = "";
+    $("idea-submit").textContent = "Add idea"; $("idea-cancel").hidden = true;
+  }
+
+  $("idea-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const id = $("idea-id").value;
+    const data = { author:$("idea-author").value.trim(), title:$("idea-title").value.trim(), desc:$("idea-desc").value.trim() };
+    $("idea-submit").disabled = true; status("Saving...");
+    try {
+      if (id) await update(ref(db, "capstone8000_ideas/" + id), data);
+      else await set(push(ideasRef), { ...data, ts: Date.now() });
+      resetForm(); status("Saved!");
+      $("ideas").scrollIntoView({ behavior:"smooth" });
+    } catch { status("Could not save. The database rules may not allow writing yet."); }
+    $("idea-submit").disabled = false;
+  });
+
+  $("ideas-grid").addEventListener("click", async e => {
+    const edit = e.target.dataset.edit, del = e.target.dataset.del;
+    if (edit) {
+      const i = ideas.find(x => x.id === edit); if (!i) return;
+      $("idea-id").value = i.id; $("idea-author").value = i.author; $("idea-title").value = i.title; $("idea-desc").value = i.desc;
+      $("idea-submit").textContent = "Save changes"; $("idea-cancel").hidden = false;
+      $("add").scrollIntoView({ behavior:"smooth" });
+    } else if (del && confirm("Delete this idea?")) {
+      try { await remove(ref(db, "capstone8000_ideas/" + del)); } catch { alert("Could not delete. Check the database rules."); }
+    }
+  });
+  $("idea-cancel").addEventListener("click", resetForm);
+
 }
-
-function renderIdeas(ideas) {
-  $("ideas-grid").innerHTML = ideas.length ? ideas.map(i => `
-    <article class="card idea">
-      <div class="card-head"><h3>${esc(i.title)}</h3></div>
-      <div class="body">${esc(i.desc).replace(/\n/g,"<br>")}<div class="by">Idea by ${esc(i.author || "Anonymous")}</div></div>
-      <div class="actions"><a class="ghost btn" href="${REPO_EDIT}" target="_blank" rel="noopener">Edit on GitHub</a></div>
-    </article>`).join("") : '<p class="empty">No ideas yet. Be the first to add one below!</p>';
-}
-
-fetch("ideas", { cache:"no-store" })
-  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
-  .then(t => renderIdeas(parseIdeas(t)))
-  .catch(() => { $("ideas-grid").innerHTML = '<p class="empty">Could not load the ideas file.</p>'; });
-
-$("idea-form").addEventListener("submit", async e => {
-  e.preventDefault();
-  const clean = v => v.trim().replace(/\r?\n/g, "\n    ");
-  const block = `\nTitle: ${$("idea-title").value.trim()}\nAuthor: ${$("idea-author").value.trim()}\nDescription: ${clean($("idea-desc").value)}\n`;
-  let copied = false;
-  try { await navigator.clipboard.writeText(block); copied = true; } catch {}
-  if (!copied) prompt("Copy this idea, then paste it at the end of the ideas file:", block);
-  window.open(REPO_EDIT, "_blank", "noopener");
-  $("idea-help").textContent = copied ? "Copied! Paste it at the end of the file on GitHub and commit." : "Paste the text at the end of the file on GitHub and commit.";
-  $("idea-form").reset();
-});
 
 $("year").textContent = new Date().getFullYear();
-renderIdeas();
 </script>
 </body>
 </html>
