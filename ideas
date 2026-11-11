@@ -4,3 +4,12 @@
 Title: Chatbot App
 Author: Kisshan Haulkory
 Description: A chatbot should be able to assist people with issues with different topics. Have steps with images and videos where available.
+
+
+Title: AI-Powered Fake News Detector Browser Extension
+Author: Kutay Sunguroglu
+Description: A browser extension that helps users identify fake or misleading information on social media platforms. When a user clicks the "Analyze" button on a post, the extension uses artificial intelligence to examine the content, check its sources, and compare its claims with reliable information from trusted websites.
+        
+        Based on the analysis, the extension provides a trust score from 0 to 10, where 0 indicates highly unreliable information and 10 indicates highly trustworthy information.
+        
+        The extension also provides a short explanation of the score and links to supporting sources, helping users decide whether the information is credible before sharing it.
