@@ -3,51 +3,148 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Profiles</title>
+<title>Capstone8000 – Team Profiles &amp; Project Ideas</title>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 0; background: #f4f5f7; color: #1c1e21; }
-  header { padding: 2rem 1rem 1rem; text-align: center; }
-  main { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 1000px; margin: 0 auto; padding: 1rem; }
-  .card { background: #fff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
-  .card h2 { margin: 0 0 .25rem; }
-  .from { color: #666; margin: 0 0 1rem; }
-  dt { font-weight: 600; margin-top: .75rem; }
-  dd { margin: .15rem 0 0; }
+  :root { --brand:#4f46e5; --brand-d:#3730a3; --bg:#f3f4f8; --ink:#1f2330; --muted:#6b7280; --line:#e5e7eb; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; }
+  header { background:linear-gradient(135deg,var(--brand),#7c3aed); color:#fff; padding:2.5rem 1rem; text-align:center; }
+  header h1 { margin:0 0 .4rem; font-size:2rem; }
+  header p { margin:0; opacity:.9; }
+  nav { margin-top:1rem; }
+  nav a { color:#fff; text-decoration:none; margin:0 .75rem; font-weight:600; border-bottom:2px solid transparent; }
+  nav a:hover { border-color:#fff; }
+  main { flex:1; width:100%; max-width:1100px; margin:0 auto; padding:1.5rem 1rem 3rem; }
+  h2.section { margin:2rem 0 1rem; font-size:1.4rem; }
+  .grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); }
+  .card { background:#fff; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,.08); overflow:hidden; display:flex; flex-direction:column; }
+  .card-head { padding:1rem 1.25rem; border-bottom:1px solid var(--line); }
+  .card-head h3 { margin:0; font-size:1.15rem; }
+  .avatar { width:44px; height:44px; border-radius:50%; background:var(--brand); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; margin-right:.75rem; vertical-align:middle; }
+  .row { display:flex; gap:.75rem; padding:.65rem 1.25rem; border-bottom:1px solid var(--line); font-size:.95rem; }
+  .row:last-child { border-bottom:0; }
+  .row .k { flex:0 0 105px; color:var(--muted); font-weight:600; }
+  .row .v { flex:1; }
+  .tag { display:inline-block; background:#eef2ff; color:var(--brand-d); border-radius:999px; padding:.1rem .6rem; margin:.1rem .15rem .1rem 0; font-size:.85rem; }
+  .idea .body { padding:1rem 1.25rem; flex:1; }
+  .idea .by { color:var(--muted); font-size:.85rem; margin-top:.5rem; }
+  .actions { padding:.6rem 1.25rem; border-top:1px solid var(--line); display:flex; gap:.5rem; }
+  button { font:inherit; cursor:pointer; border:0; border-radius:8px; padding:.5rem .9rem; font-weight:600; }
+  .primary { background:var(--brand); color:#fff; } .primary:hover { background:var(--brand-d); }
+  .ghost { background:#f3f4f6; color:var(--ink); } .danger { background:#fee2e2; color:#b91c1c; }
+  form { background:#fff; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:1.25rem; display:grid; gap:.75rem; }
+  label { font-weight:600; font-size:.9rem; display:grid; gap:.3rem; }
+  input, textarea { font:inherit; padding:.6rem .7rem; border:1px solid #d1d5db; border-radius:8px; width:100%; }
+  textarea { min-height:90px; resize:vertical; }
+  .empty { color:var(--muted); }
+  footer { background:#1f2330; color:#cbd5e1; text-align:center; padding:1.25rem 1rem; font-size:.9rem; }
+  footer a { color:#a5b4fc; }
 </style>
 </head>
 <body>
-<header><h1>Profiles</h1></header>
-<main id="profiles"></main>
+<header>
+  <h1>Capstone8000</h1>
+  <p>Meet the team and share your ideas for the project</p>
+  <nav><a href="#team">Team</a><a href="#ideas">Project Ideas</a><a href="#add">Add an Idea</a></nav>
+</header>
+
+<main>
+  <h2 class="section" id="team">Team Profiles</h2>
+  <div class="grid" id="profiles"></div>
+
+  <h2 class="section" id="ideas">Project Ideas</h2>
+  <div class="grid" id="ideas-grid"></div>
+
+  <h2 class="section" id="add">Add an Idea</h2>
+  <form id="idea-form">
+    <input type="hidden" id="idea-id">
+    <label>Your name <input id="idea-author" required maxlength="60"></label>
+    <label>Idea title <input id="idea-title" required maxlength="100"></label>
+    <label>Description <textarea id="idea-desc" required maxlength="1000"></textarea></label>
+    <div><button class="primary" type="submit" id="idea-submit">Add idea</button>
+         <button class="ghost" type="button" id="idea-cancel" hidden>Cancel edit</button></div>
+  </form>
+</main>
+
+<footer>
+  &copy; <span id="year"></span> Capstone8000 &middot;
+  <a href="https://github.com/kisshan2202/capstone8000">View on GitHub</a>
+</footer>
+
 <script>
-// Add one object per person here; every entry is rendered automatically.
+// ---- Team profiles: add one object per person ----
 const people = [
-  {
-    name: "Kisshan Haulkory",
-    from: "Mauritius",
-    skills: ["Python", "Android", "Java", "Vehicle Diagnostics", "AI engineering", "Database"],
-    experience: [
-      "Software Engineer (5 years doing Android dev)",
-      "Technical Lead Engineer (5 years Vehicle Diagnostic for Renault Nissan)",
-      "Current AI engineer"
-    ],
-    hobbies: ["Soccer", "Running"],
-    future: "AI Engineer / Data Engineer"
-  }
+  { name:"Kisshan Haulkory", from:"Mauritius",
+    skills:["Python","Android","Java","Vehicle Diagnostics","AI engineering","Database"],
+    experience:["Software Engineer (5 years doing Android dev)","Technical Lead Engineer (5 years Vehicle Diagnostic for Renault Nissan)","Current AI engineer"],
+    hobbies:["Soccer","Running"], future:"AI Engineer / Data Engineer" }
 ];
 
-const list = a => "<ul>" + a.map(x => `<li>${esc(x)}</li>`).join("") + "</ul>";
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-document.getElementById("profiles").innerHTML = people.map(p => `
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $ = id => document.getElementById(id);
+const tags = a => a.map(x => `<span class="tag">${esc(x)}</span>`).join("");
+const row = (k, v) => `<div class="row"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+
+$("profiles").innerHTML = people.map(p => `
   <article class="card">
-    <h2>${esc(p.name)}</h2>
-    <p class="from">From ${esc(p.from)}</p>
-    <dl>
-      <dt>IT skills</dt><dd>${esc(p.skills.join(", "))}</dd>
-      <dt>Work experience</dt><dd>${list(p.experience)}</dd>
-      <dt>Hobbies</dt><dd>${esc(p.hobbies.join(", "))}</dd>
-      <dt>Future work</dt><dd>${esc(p.future)}</dd>
-    </dl>
+    <div class="card-head"><span class="avatar">${esc(p.name.split(" ").map(w=>w[0]).slice(0,2).join(""))}</span><h3 style="display:inline">${esc(p.name)}</h3></div>
+    ${row("From", esc(p.from))}
+    ${row("IT skills", tags(p.skills))}
+    ${row("Experience", p.experience.map(esc).join("<br>"))}
+    ${row("Hobbies", tags(p.hobbies))}
+    ${row("Future work", esc(p.future))}
   </article>`).join("");
+
+// ---- Ideas storage: swap this object for a shared backend to let everyone see the same ideas ----
+const store = {
+  key: "capstone8000-ideas",
+  load() { try { return JSON.parse(localStorage.getItem(this.key)) || []; } catch { return []; } },
+  save(list) { try { localStorage.setItem(this.key, JSON.stringify(list)); } catch {} }
+};
+let ideas = store.load();
+
+function renderIdeas() {
+  $("ideas-grid").innerHTML = ideas.length ? ideas.map(i => `
+    <article class="card idea">
+      <div class="card-head"><h3>${esc(i.title)}</h3></div>
+      <div class="body">${esc(i.desc).replace(/\n/g,"<br>")}<div class="by">Idea by ${esc(i.author)}</div></div>
+      <div class="actions">
+        <button class="ghost" data-edit="${i.id}">Edit</button>
+        <button class="danger" data-del="${i.id}">Delete</button>
+      </div>
+    </article>`).join("") : '<p class="empty">No ideas yet. Be the first to add one below!</p>';
+}
+
+function resetForm() {
+  $("idea-form").reset(); $("idea-id").value = "";
+  $("idea-submit").textContent = "Add idea"; $("idea-cancel").hidden = true;
+}
+
+$("idea-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const id = $("idea-id").value;
+  const data = { author:$("idea-author").value.trim(), title:$("idea-title").value.trim(), desc:$("idea-desc").value.trim() };
+  if (id) ideas = ideas.map(i => i.id === id ? { ...i, ...data } : i);
+  else ideas.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), ...data });
+  store.save(ideas); renderIdeas(); resetForm();
+  $("ideas").scrollIntoView({ behavior:"smooth" });
+});
+
+$("ideas-grid").addEventListener("click", e => {
+  const edit = e.target.dataset.edit, del = e.target.dataset.del;
+  if (edit) {
+    const i = ideas.find(x => x.id === edit);
+    $("idea-id").value = i.id; $("idea-author").value = i.author; $("idea-title").value = i.title; $("idea-desc").value = i.desc;
+    $("idea-submit").textContent = "Save changes"; $("idea-cancel").hidden = false;
+    $("add").scrollIntoView({ behavior:"smooth" });
+  } else if (del && confirm("Delete this idea?")) {
+    ideas = ideas.filter(x => x.id !== del); store.save(ideas); renderIdeas();
+  }
+});
+$("idea-cancel").addEventListener("click", resetForm);
+
+$("year").textContent = new Date().getFullYear();
+renderIdeas();
 </script>
 </body>
 </html>
