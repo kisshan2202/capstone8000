@@ -1,7 +1,53 @@
-Name: Kisshan Haulkory
-From: Mauritius 
-IT skills: Python, Android, Java, Vehicle Diagnostics, AI engineering, Database 
-Work Experience : Software Engineer (5 years doing Android dev) + 
-					Technical Lead Engineer (5 years Vehicle Diagnostic for Renault Nissan) + Current AI engineer 
-Hobbies: Soccer, Running
-Future Work: AI Engineer/ Data Engineer
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profiles</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; background: #f4f5f7; color: #1c1e21; }
+  header { padding: 2rem 1rem 1rem; text-align: center; }
+  main { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); max-width: 1000px; margin: 0 auto; padding: 1rem; }
+  .card { background: #fff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+  .card h2 { margin: 0 0 .25rem; }
+  .from { color: #666; margin: 0 0 1rem; }
+  dt { font-weight: 600; margin-top: .75rem; }
+  dd { margin: .15rem 0 0; }
+</style>
+</head>
+<body>
+<header><h1>Profiles</h1></header>
+<main id="profiles"></main>
+<script>
+// Add one object per person here; every entry is rendered automatically.
+const people = [
+  {
+    name: "Kisshan Haulkory",
+    from: "Mauritius",
+    skills: ["Python", "Android", "Java", "Vehicle Diagnostics", "AI engineering", "Database"],
+    experience: [
+      "Software Engineer (5 years doing Android dev)",
+      "Technical Lead Engineer (5 years Vehicle Diagnostic for Renault Nissan)",
+      "Current AI engineer"
+    ],
+    hobbies: ["Soccer", "Running"],
+    future: "AI Engineer / Data Engineer"
+  }
+];
+
+const list = a => "<ul>" + a.map(x => `<li>${esc(x)}</li>`).join("") + "</ul>";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+document.getElementById("profiles").innerHTML = people.map(p => `
+  <article class="card">
+    <h2>${esc(p.name)}</h2>
+    <p class="from">From ${esc(p.from)}</p>
+    <dl>
+      <dt>IT skills</dt><dd>${esc(p.skills.join(", "))}</dd>
+      <dt>Work experience</dt><dd>${list(p.experience)}</dd>
+      <dt>Hobbies</dt><dd>${esc(p.hobbies.join(", "))}</dd>
+      <dt>Future work</dt><dd>${esc(p.future)}</dd>
+    </dl>
+  </article>`).join("");
+</script>
+</body>
+</html>
