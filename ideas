@@ -5,3 +5,12 @@ Title: Example idea - team skills matcher
 Author: Kisshan Haulkory
 Description: Match team members' skills to project tasks so work is split sensibly.
     Replace or delete this example.
+
+
+Title: AI-Powered Fake News Detector Browser Extension
+Author: Kutay Sunguroglu
+Description: A browser extension that helps users identify fake or misleading information on social media platforms. When a user clicks the "Analyze" button on a post, the extension uses artificial intelligence to examine the content, check its sources, and compare its claims with reliable information from trusted websites.
+    
+    Based on the analysis, the extension provides a trust score from 0 to 10, where 0 indicates highly unreliable information and 10 indicates highly trustworthy information.
+    
+    The extension also provides a short explanation of the score and links to supporting sources, helping users decide whether the information is credible before sharing it.
