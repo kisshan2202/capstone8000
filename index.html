@@ -5,60 +5,91 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Capstone8000 – Team Profiles &amp; Project Ideas</title>
 <style>
-  :root { --brand:#000; --brand-d:#333; --bg:#fff; --ink:#000; --muted:#555; --line:#000; }
+  /* Themes: chosen with the picker in the header, remembered in this browser (data-skin on <html>) */
+  :root, html[data-skin="paper"] { --bg:#fff; --surface:#fff; --ink:#000; --muted:#555; --rule:#000; --soft:#ddd;
+    --accent:#000; --accent-fg:#fff; --accent-hover:#333; --hdr-bg:#000; --hdr-fg:#fff;
+    --name:#1d4ed8; --title:#b45309; color-scheme:light; }
+  html[data-skin="concrete"] { --bg:#d6d6d6; --surface:#eee; --ink:#151515; --muted:#4a4a4a; --rule:#151515; --soft:#bbb;
+    --accent:#151515; --accent-fg:#eee; --accent-hover:#3a3a3a; --hdr-bg:#151515; --hdr-fg:#eee;
+    --name:#1a47b8; --title:#9a4a06; color-scheme:light; }
+  html[data-skin="graphite"] { --bg:#1c1c1e; --surface:#26262a; --ink:#ececec; --muted:#a3a3a8; --rule:#8a8a90; --soft:#3a3a3e;
+    --accent:#ececec; --accent-fg:#1c1c1e; --accent-hover:#fff; --hdr-bg:#0e0e10; --hdr-fg:#ececec;
+    --name:#8ab4ff; --title:#ffb454; color-scheme:dark; }
+  html[data-skin="ink"] { --bg:#000; --surface:#0b0b0b; --ink:#fff; --muted:#9a9a9a; --rule:#bdbdbd; --soft:#262626;
+    --accent:#fff; --accent-fg:#000; --accent-hover:#ddd; --hdr-bg:#000; --hdr-fg:#fff;
+    --name:#7fb0ff; --title:#ffc062; color-scheme:dark; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; }
-  header { background:#000; color:#fff; padding:2.5rem 1rem; text-align:center; }
+  header { background:var(--hdr-bg); color:var(--hdr-fg); padding:2.5rem 1rem 1.5rem; text-align:center; border-bottom:2px solid var(--rule); }
   header h1 { margin:0 0 .4rem; font-size:2rem; }
   header p { margin:0; opacity:.9; }
   nav { margin-top:1rem; }
-  nav a { color:#fff; text-decoration:none; margin:0 .75rem; font-weight:600; border-bottom:2px solid transparent; }
-  nav a:hover { border-color:#fff; }
+  nav a { color:var(--hdr-fg); text-decoration:none; margin:0 .75rem; font-weight:600; border-bottom:2px solid transparent; }
+  nav a:hover { border-color:var(--hdr-fg); }
   main { flex:1; width:100%; max-width:1100px; margin:0 auto; padding:1.5rem 1rem 3rem; }
   h2.section { margin:2rem 0 1rem; font-size:1.4rem; }
   .grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); }
-  .card { background:#fff; border-radius:0; border:2px solid #000; overflow:hidden; display:flex; flex-direction:column; }
-  .card-head { padding:1rem 1.25rem; border-bottom:1px solid var(--line); }
+  .card { background:var(--surface); border-radius:0; border:2px solid var(--rule); overflow:hidden; display:flex; flex-direction:column; }
+  .card-head { padding:1rem 1.25rem; border-bottom:1px solid var(--rule); }
   .card-head h3 { margin:0; font-size:1.15rem; }
-  .avatar { width:44px; height:44px; border-radius:50%; background:var(--brand); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:700; margin-right:.75rem; vertical-align:middle; }
-  .row { display:flex; gap:.75rem; padding:.65rem 1.25rem; border-bottom:1px solid var(--line); font-size:.95rem; }
+  .pname { color:var(--name); }
+  .idea .card-head h3 { color:var(--title); }
+  .avatar { width:44px; height:44px; border-radius:50%; background:var(--accent); color:var(--accent-fg); display:inline-flex; align-items:center; justify-content:center; font-weight:700; margin-right:.75rem; vertical-align:middle; }
+  .row { display:flex; gap:.75rem; padding:.65rem 1.25rem; border-bottom:1px solid var(--soft); font-size:.95rem; }
   .row:last-child { border-bottom:0; }
   .row .k { flex:0 0 105px; color:var(--muted); font-weight:600; }
   .row .v { flex:1; }
-  .tag { display:inline-block; background:#fff; color:#000; border:1px solid #000; border-radius:999px; padding:.1rem .6rem; margin:.1rem .15rem .1rem 0; font-size:.85rem; }
+  .tag { display:inline-block; background:var(--surface); color:var(--ink); border:1px solid var(--rule); border-radius:999px; padding:.1rem .6rem; margin:.1rem .15rem .1rem 0; font-size:.85rem; }
   .idea .body { padding:1rem 1.25rem; flex:1; }
   .idea .by { color:var(--muted); font-size:.85rem; margin-top:.5rem; }
-  .actions { padding:.6rem 1.25rem; border-top:1px solid var(--line); display:flex; gap:.5rem; }
+  .actions { padding:.6rem 1.25rem; border-top:1px solid var(--rule); display:flex; gap:.5rem; }
   .btn { display:inline-block; text-decoration:none; border-radius:0; padding:.5rem .9rem; font-weight:600; }
   button { font:inherit; cursor:pointer; border:0; border-radius:0; padding:.5rem .9rem; font-weight:600; }
-  .primary { background:var(--brand); color:#fff; } .primary:hover { background:var(--brand-d); }
-  .ghost { background:#fff; color:#000; border:1px solid #000; } .danger { background:#fff; color:#000; border:1px solid #000; text-decoration:underline; }
-  form { background:#fff; border-radius:0; border:2px solid #000; padding:1.25rem; display:grid; gap:.75rem; }
+  .primary { background:var(--accent); color:var(--accent-fg); } .primary:hover { background:var(--accent-hover); }
+  .ghost { background:var(--surface); color:var(--ink); border:1px solid var(--rule); } .danger { background:var(--surface); color:var(--ink); border:1px solid var(--rule); text-decoration:underline; }
+  form { background:var(--surface); border-radius:0; border:2px solid var(--rule); padding:1.25rem; display:grid; gap:.75rem; }
   label { font-weight:600; font-size:.9rem; display:grid; gap:.3rem; }
-  input, textarea { font:inherit; padding:.6rem .7rem; border:1px solid #000; border-radius:0; width:100%; }
+  input, textarea { font:inherit; padding:.6rem .7rem; border:1px solid var(--rule); border-radius:0; width:100%; background:var(--bg); color:var(--ink); }
   textarea { min-height:90px; resize:vertical; }
   .empty { color:var(--muted); }
   #ideas-grid { display:grid; grid-template-columns:1fr; gap:1rem; }
   .idea { flex-direction:row; align-items:stretch; }
-  .idea .card-head { flex:0 0 28%; border-bottom:0; border-right:2px solid #000; display:flex; align-items:center; }
+  .idea .card-head { flex:0 0 28%; border-bottom:0; border-right:2px solid var(--rule); display:flex; align-items:center; }
   .idea .card-head h3 { font-size:1.2rem; overflow-wrap:anywhere; }
   .idea .body { padding:1.1rem 1.5rem; flex:1; line-height:1.55; overflow-wrap:anywhere; }
   .idea .by { margin-top:.75rem; font-weight:600; }
-  .idea .actions { flex:0 0 auto; flex-direction:column; justify-content:center; border-top:0; border-left:2px solid #000; padding:1rem 1.25rem; }
+  .idea .actions { flex:0 0 auto; flex-direction:column; justify-content:center; border-top:0; border-left:2px solid var(--rule); padding:1rem 1.25rem; }
   @media (max-width:700px) {
     .idea { flex-direction:column; }
-    .idea .card-head { flex:none; border-right:0; border-bottom:2px solid #000; }
-    .idea .actions { flex-direction:row; border-left:0; border-top:2px solid #000; }
+    .idea .card-head { flex:none; border-right:0; border-bottom:2px solid var(--rule); }
+    .idea .actions { flex-direction:row; border-left:0; border-top:2px solid var(--rule); }
   }
-  footer { background:#000; color:#fff; text-align:center; padding:1.25rem 1rem; font-size:.9rem; }
-  footer a { color:#fff; }
+  .skinbar { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.4rem; justify-content:center; align-items:center; font-size:.8rem; }
+  .skinbar > span { text-transform:uppercase; letter-spacing:.08em; opacity:.8; margin-right:.25rem; }
+  .skin { display:inline-flex; align-items:center; gap:.4rem; background:transparent; color:var(--hdr-fg); border:1px solid var(--hdr-fg); padding:.3rem .65rem .3rem .45rem; font-size:.8rem; font-weight:500; }
+  .skin i { width:14px; height:14px; border-radius:50%; border:1px solid #888; background:linear-gradient(135deg,var(--sw1) 50%,var(--sw2) 50%); }
+  .skin[aria-pressed="true"] { box-shadow:inset 0 0 0 1px var(--hdr-fg); font-weight:700; }
+  footer { background:var(--hdr-bg); color:var(--hdr-fg); border-top:2px solid var(--rule); text-align:center; padding:1.25rem 1rem; font-size:.9rem; }
+  footer a { color:var(--hdr-fg); }
 </style>
+<script>
+  // apply the remembered theme before the page paints
+  try { var k = localStorage.getItem("capstone8000-skin"); document.documentElement.setAttribute("data-skin", /^(paper|concrete|graphite|ink)$/.test(k) ? k : "paper"); }
+  catch (e) { document.documentElement.setAttribute("data-skin", "paper"); }
+</script>
 </head>
 <body>
 <header>
   <h1>Capstone8000</h1>
   <p>Meet the team and share your ideas for the project</p>
   <nav><a href="#team">Team</a><a href="#ideas">Project Ideas</a><a href="#add">Add an Idea</a></nav>
+  <div class="skinbar" id="skinbar" role="group" aria-label="Theme">
+    <span>Theme</span>
+    <button class="skin" type="button" data-skin="paper" style="--sw1:#fff;--sw2:#111"><i></i>Paper</button>
+    <button class="skin" type="button" data-skin="concrete" style="--sw1:#d6d6d6;--sw2:#151515"><i></i>Concrete</button>
+    <button class="skin" type="button" data-skin="graphite" style="--sw1:#1c1c1e;--sw2:#ececec"><i></i>Graphite</button>
+    <button class="skin" type="button" data-skin="ink" style="--sw1:#000;--sw2:#fff"><i></i>Ink</button>
+  </div>
 </header>
 
 <main>
@@ -85,6 +116,20 @@
   <a href="https://github.com/kisshan2202/capstone8000">View on GitHub</a>
 </footer>
 
+<script>
+  (function () {
+    var bar = document.getElementById("skinbar");
+    function mark() { var c = document.documentElement.getAttribute("data-skin");
+      bar.querySelectorAll(".skin").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.skin === c); }); }
+    bar.addEventListener("click", function (e) {
+      var b = e.target.closest(".skin"); if (!b) return;
+      document.documentElement.setAttribute("data-skin", b.dataset.skin);
+      try { localStorage.setItem("capstone8000-skin", b.dataset.skin); } catch (err) {}
+      mark();
+    });
+    mark();
+  })();
+</script>
 <script type="module">
 
 // ---- Team profiles: loaded from the "details" file in this repo ----
@@ -122,7 +167,7 @@ function parseDetails(text) {
 function renderProfiles(people) {
   $("profiles").innerHTML = people.length ? people.map(p => `
     <article class="card">
-      <div class="card-head"><span class="avatar">${esc(p.name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase())}</span><h3 style="display:inline">${esc(p.name)}</h3></div>
+      <div class="card-head"><span class="avatar">${esc(p.name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase())}</span><h3 class="pname" style="display:inline">${esc(p.name)}</h3></div>
       ${row("From", esc(p.from))}
       ${row("IT skills", tags(p.skills))}
       ${row("Experience", p.experience.map(esc).join("<br>"))}
