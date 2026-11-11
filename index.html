@@ -29,6 +29,7 @@
   .idea .body { padding:1rem 1.25rem; flex:1; }
   .idea .by { color:var(--muted); font-size:.85rem; margin-top:.5rem; }
   .actions { padding:.6rem 1.25rem; border-top:1px solid var(--line); display:flex; gap:.5rem; }
+  .btn { display:inline-block; text-decoration:none; border-radius:0; padding:.5rem .9rem; font-weight:600; }
   button { font:inherit; cursor:pointer; border:0; border-radius:0; padding:.5rem .9rem; font-weight:600; }
   .primary { background:var(--brand); color:#fff; } .primary:hover { background:var(--brand-d); }
   .ghost { background:#fff; color:#000; border:1px solid #000; } .danger { background:#fff; color:#000; border:1px solid #000; text-decoration:underline; }
@@ -57,12 +58,11 @@
 
   <h2 class="section" id="add">Add an Idea</h2>
   <form id="idea-form">
-    <input type="hidden" id="idea-id">
     <label>Your name <input id="idea-author" required maxlength="60"></label>
     <label>Idea title <input id="idea-title" required maxlength="100"></label>
     <label>Description <textarea id="idea-desc" required maxlength="1000"></textarea></label>
-    <div><button class="primary" type="submit" id="idea-submit">Add idea</button>
-         <button class="ghost" type="button" id="idea-cancel" hidden>Cancel edit</button></div>
+    <div><button class="primary" type="submit">Submit idea on GitHub</button></div>
+    <p class="empty" id="idea-help">Submitting copies your idea and opens the <code>ideas</code> file on GitHub. Paste at the end of the file and commit; it then appears here as a card.</p>
   </form>
 </main>
 
@@ -121,53 +121,50 @@ fetch("details", { cache:"no-store" })
   .then(t => renderProfiles(parseDetails(t)))
   .catch(() => { $("profiles").innerHTML = '<p class="empty">Could not load the details file.</p>'; });
 
-// ---- Ideas storage: swap this object for a shared backend to let everyone see the same ideas ----
-const store = {
-  key: "capstone8000-ideas",
-  load() { try { return JSON.parse(localStorage.getItem(this.key)) || []; } catch { return []; } },
-  save(list) { try { localStorage.setItem(this.key, JSON.stringify(list)); } catch {} }
-};
-let ideas = store.load();
+// ---- Ideas: loaded from the "ideas" file in this repo ----
+const REPO_EDIT = "https://github.com/kisshan2202/capstone8000/edit/main/ideas";
+const IDEA_KEYS = { "title":"title", "author":"author", "description":"desc" };
 
-function renderIdeas() {
+function parseIdeas(text) {
+  const out = []; let cur = null, field = null;
+  for (const raw of text.replace(/\r/g, "").split("\n")) {
+    if (!raw.trim() || raw.trim().startsWith("#")) continue;
+    const m = /^(\S[^:]*?)\s*:\s*(.*)$/.exec(raw);
+    const key = m && IDEA_KEYS[m[1].trim().toLowerCase()];
+    if (key) {
+      if (key === "title") { cur = { title:"", author:"", desc:"" }; out.push(cur); }
+      if (!cur) continue;
+      field = key; cur[key] = m[2].trim();
+    } else if (cur && field) cur[field] += "\n" + raw.trim();
+  }
+  return out.filter(i => i.title);
+}
+
+function renderIdeas(ideas) {
   $("ideas-grid").innerHTML = ideas.length ? ideas.map(i => `
     <article class="card idea">
       <div class="card-head"><h3>${esc(i.title)}</h3></div>
-      <div class="body">${esc(i.desc).replace(/\n/g,"<br>")}<div class="by">Idea by ${esc(i.author)}</div></div>
-      <div class="actions">
-        <button class="ghost" data-edit="${i.id}">Edit</button>
-        <button class="danger" data-del="${i.id}">Delete</button>
-      </div>
+      <div class="body">${esc(i.desc).replace(/\n/g,"<br>")}<div class="by">Idea by ${esc(i.author || "Anonymous")}</div></div>
+      <div class="actions"><a class="ghost btn" href="${REPO_EDIT}" target="_blank" rel="noopener">Edit on GitHub</a></div>
     </article>`).join("") : '<p class="empty">No ideas yet. Be the first to add one below!</p>';
 }
 
-function resetForm() {
-  $("idea-form").reset(); $("idea-id").value = "";
-  $("idea-submit").textContent = "Add idea"; $("idea-cancel").hidden = true;
-}
+fetch("ideas", { cache:"no-store" })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(t => renderIdeas(parseIdeas(t)))
+  .catch(() => { $("ideas-grid").innerHTML = '<p class="empty">Could not load the ideas file.</p>'; });
 
-$("idea-form").addEventListener("submit", e => {
+$("idea-form").addEventListener("submit", async e => {
   e.preventDefault();
-  const id = $("idea-id").value;
-  const data = { author:$("idea-author").value.trim(), title:$("idea-title").value.trim(), desc:$("idea-desc").value.trim() };
-  if (id) ideas = ideas.map(i => i.id === id ? { ...i, ...data } : i);
-  else ideas.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), ...data });
-  store.save(ideas); renderIdeas(); resetForm();
-  $("ideas").scrollIntoView({ behavior:"smooth" });
+  const clean = v => v.trim().replace(/\r?\n/g, "\n    ");
+  const block = `\nTitle: ${$("idea-title").value.trim()}\nAuthor: ${$("idea-author").value.trim()}\nDescription: ${clean($("idea-desc").value)}\n`;
+  let copied = false;
+  try { await navigator.clipboard.writeText(block); copied = true; } catch {}
+  if (!copied) prompt("Copy this idea, then paste it at the end of the ideas file:", block);
+  window.open(REPO_EDIT, "_blank", "noopener");
+  $("idea-help").textContent = copied ? "Copied! Paste it at the end of the file on GitHub and commit." : "Paste the text at the end of the file on GitHub and commit.";
+  $("idea-form").reset();
 });
-
-$("ideas-grid").addEventListener("click", e => {
-  const edit = e.target.dataset.edit, del = e.target.dataset.del;
-  if (edit) {
-    const i = ideas.find(x => x.id === edit);
-    $("idea-id").value = i.id; $("idea-author").value = i.author; $("idea-title").value = i.title; $("idea-desc").value = i.desc;
-    $("idea-submit").textContent = "Save changes"; $("idea-cancel").hidden = false;
-    $("add").scrollIntoView({ behavior:"smooth" });
-  } else if (del && confirm("Delete this idea?")) {
-    ideas = ideas.filter(x => x.id !== del); store.save(ideas); renderIdeas();
-  }
-});
-$("idea-cancel").addEventListener("click", resetForm);
 
 $("year").textContent = new Date().getFullYear();
 renderIdeas();
