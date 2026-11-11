@@ -72,28 +72,54 @@
 </footer>
 
 <script>
-// ---- Team profiles: add one object per person ----
-const people = [
-  { name:"Kisshan Haulkory", from:"Mauritius",
-    skills:["Python","Android","Java","Vehicle Diagnostics","AI engineering","Database"],
-    experience:["Software Engineer (5 years doing Android dev)","Technical Lead Engineer (5 years Vehicle Diagnostic for Renault Nissan)","Current AI engineer"],
-    hobbies:["Soccer","Running"], future:"AI Engineer / Data Engineer" }
-];
-
+// ---- Team profiles: loaded from the "details" file in this repo ----
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $ = id => document.getElementById(id);
 const tags = a => a.map(x => `<span class="tag">${esc(x)}</span>`).join("");
 const row = (k, v) => `<div class="row"><div class="k">${k}</div><div class="v">${v}</div></div>`;
 
-$("profiles").innerHTML = people.map(p => `
-  <article class="card">
-    <div class="card-head"><span class="avatar">${esc(p.name.split(" ").map(w=>w[0]).slice(0,2).join(""))}</span><h3 style="display:inline">${esc(p.name)}</h3></div>
-    ${row("From", esc(p.from))}
-    ${row("IT skills", tags(p.skills))}
-    ${row("Experience", p.experience.map(esc).join("<br>"))}
-    ${row("Hobbies", tags(p.hobbies))}
-    ${row("Future work", esc(p.future))}
-  </article>`).join("");
+const KEYS = { "name":"name", "from":"from", "it skills":"skills", "skills":"skills",
+  "work experience":"experience", "experience":"experience", "hobbies":"hobbies",
+  "future work":"future" };
+
+function parseDetails(text) {
+  const people = []; let cur = null, field = null;
+  for (const raw of text.replace(/\r/g, "").split("\n")) {
+    if (!raw.trim() || raw.trim().startsWith("#")) continue;
+    const m = /^(\S[^:]*?)\s*:\s*(.*)$/.exec(raw);
+    const key = m && KEYS[m[1].trim().toLowerCase()];
+    if (key) {
+      if (key === "name") { cur = { name:"", from:"", skills:"", experience:"", hobbies:"", future:"" }; people.push(cur); }
+      if (!cur) continue;
+      field = key; cur[key] = m[2].trim();
+    } else if (cur && field) {           // continuation line of the previous field
+      cur[field] += "\n" + raw.trim();
+    }
+  }
+  const list = (v, sep) => v.split(sep).map(x => x.trim()).filter(Boolean);
+  return people.filter(p => p.name).map(p => ({
+    name:p.name, from:p.from,
+    skills:list(p.skills, /[,\n]/), hobbies:list(p.hobbies, /[,\n]/),
+    experience:list(p.experience, /[+\n]/), future:p.future.replace(/\n/g, " ")
+  }));
+}
+
+function renderProfiles(people) {
+  $("profiles").innerHTML = people.length ? people.map(p => `
+    <article class="card">
+      <div class="card-head"><span class="avatar">${esc(p.name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase())}</span><h3 style="display:inline">${esc(p.name)}</h3></div>
+      ${row("From", esc(p.from))}
+      ${row("IT skills", tags(p.skills))}
+      ${row("Experience", p.experience.map(esc).join("<br>"))}
+      ${row("Hobbies", tags(p.hobbies))}
+      ${row("Future work", esc(p.future))}
+    </article>`).join("") : '<p class="empty">No profiles found in the details file.</p>';
+}
+
+fetch("details", { cache:"no-store" })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(t => renderProfiles(parseDetails(t)))
+  .catch(() => { $("profiles").innerHTML = '<p class="empty">Could not load the details file.</p>'; });
 
 // ---- Ideas storage: swap this object for a shared backend to let everyone see the same ideas ----
 const store = {
