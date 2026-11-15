@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add Your Profile – Capstone8000</title>
+<style>
+  :root, html[data-skin="paper"] { --bg:#fff; --surface:#fff; --ink:#000; --muted:#555; --rule:#000; --soft:#ddd;
+    --accent:#000; --accent-fg:#fff; --accent-hover:#333; --hdr-bg:#000; --hdr-fg:#fff;
+    --name:#1d4ed8; --title:#b45309; --err:#b00020; color-scheme:light; }
+  html[data-skin="concrete"] { --bg:#d6d6d6; --surface:#eee; --ink:#151515; --muted:#4a4a4a; --rule:#151515; --soft:#bbb;
+    --accent:#151515; --accent-fg:#eee; --accent-hover:#3a3a3a; --hdr-bg:#151515; --hdr-fg:#eee;
+    --name:#1a47b8; --title:#9a4a06; --err:#a0001c; color-scheme:light; }
+  html[data-skin="graphite"] { --bg:#1c1c1e; --surface:#26262a; --ink:#ececec; --muted:#a3a3a8; --rule:#8a8a90; --soft:#3a3a3e;
+    --accent:#ececec; --accent-fg:#1c1c1e; --accent-hover:#fff; --hdr-bg:#0e0e10; --hdr-fg:#ececec;
+    --name:#8ab4ff; --title:#ffb454; --err:#ff8a9b; color-scheme:dark; }
+  html[data-skin="ink"] { --bg:#000; --surface:#0b0b0b; --ink:#fff; --muted:#9a9a9a; --rule:#bdbdbd; --soft:#262626;
+    --accent:#fff; --accent-fg:#000; --accent-hover:#ddd; --hdr-bg:#000; --hdr-fg:#fff;
+    --name:#7fb0ff; --title:#ffc062; --err:#ff8a9b; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; }
+  header { background:var(--hdr-bg); color:var(--hdr-fg); padding:2rem 1rem 1.25rem; text-align:center; border-bottom:2px solid var(--rule); }
+  header h1 { margin:0 0 .4rem; font-size:2rem; }
+  header p { margin:0; opacity:.9; }
+  nav { margin-top:1rem; }
+  nav a { color:var(--hdr-fg); text-decoration:none; margin:0 .75rem; font-weight:600; border-bottom:2px solid transparent; }
+  nav a:hover, nav a[aria-current] { border-color:var(--hdr-fg); }
+  main { flex:1; width:100%; max-width:760px; margin:0 auto; padding:1.5rem 1rem 3rem; }
+  footer { background:var(--hdr-bg); color:var(--hdr-fg); border-top:2px solid var(--rule); text-align:center; padding:1.25rem 1rem; font-size:.9rem; }
+  footer a { color:var(--hdr-fg); }
+
+  form { display:grid; gap:1.25rem; }
+  fieldset { background:var(--surface); border:2px solid var(--rule); margin:0; padding:1rem 1.25rem 1.25rem; display:grid; gap:.85rem; min-width:0; }
+  legend { font-weight:700; font-size:1.1rem; padding:0 .4rem; }
+  .cols { display:grid; gap:.85rem; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+  label { font-weight:600; font-size:.9rem; display:grid; gap:.3rem; }
+  .req::after { content:" *"; color:var(--err); }
+  .hint { font-weight:400; font-size:.8rem; color:var(--muted); }
+  input, select { font:inherit; padding:.6rem .7rem; border:1px solid var(--rule); border-radius:0; width:100%; background:var(--bg); color:var(--ink); }
+  input:focus-visible, select:focus-visible, .stars:focus-visible, button:focus-visible { outline:3px solid var(--name); outline-offset:1px; }
+  button { font:inherit; cursor:pointer; border:0; border-radius:0; padding:.55rem .9rem; font-weight:600; }
+  button:disabled { opacity:.55; cursor:not-allowed; }
+  .primary { background:var(--accent); color:var(--accent-fg); } .primary:hover:not(:disabled) { background:var(--accent-hover); }
+  .ghost { background:var(--surface); color:var(--ink); border:1px solid var(--rule); }
+  .danger { background:var(--surface); color:var(--ink); border:1px solid var(--rule); text-decoration:underline; }
+  .add-row { display:flex; gap:.5rem; }
+  .add-row select { flex:1; }
+  .list { display:grid; gap:.5rem; }
+  .item { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem .9rem; border:1px solid var(--rule); padding:.55rem .75rem; background:var(--bg); }
+  .item .nm { flex:1 1 160px; font-weight:600; overflow-wrap:anywhere; }
+  .item.exp input[type=text] { flex:2 1 200px; width:auto; }
+  .item.exp .yrs { flex:0 0 130px; display:flex; align-items:center; gap:.4rem; }
+  .item.exp .yrs input { width:80px; }
+  .empty { color:var(--muted); margin:0; }
+  .total { font-size:.9rem; color:var(--muted); margin:0; }
+
+  /* half-star rating: each star is filled to --fill (0%, 50% or 100%) */
+  .stars { display:inline-flex; align-items:center; gap:.05rem; }
+  .star { font-size:1.7rem; line-height:1; cursor:pointer; user-select:none; color:transparent;
+    background:linear-gradient(90deg,var(--title) var(--fill,0%),color-mix(in srgb,var(--muted) 45%,transparent) 0);
+    -webkit-background-clip:text; background-clip:text; }
+  .stars output { margin-left:.5rem; font-size:.9rem; font-weight:700; min-width:2.2em; }
+
+  #status { margin:0; font-weight:600; min-height:1.4em; }
+  #status.err { color:var(--err); } #status.ok { color:var(--name); }
+  .skinbar { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.4rem; justify-content:center; align-items:center; font-size:.8rem; }
+  .skinbar > span { text-transform:uppercase; letter-spacing:.08em; opacity:.8; margin-right:.25rem; }
+  .skin { display:inline-flex; align-items:center; gap:.4rem; background:transparent; color:var(--hdr-fg); border:1px solid var(--hdr-fg); padding:.3rem .65rem .3rem .45rem; font-size:.8rem; font-weight:500; }
+  .skin i { width:14px; height:14px; border-radius:50%; border:1px solid #888; background:linear-gradient(135deg,var(--sw1) 50%,var(--sw2) 50%); }
+  .skin[aria-pressed="true"] { box-shadow:inset 0 0 0 1px var(--hdr-fg); font-weight:700; }
+</style>
+<script>
+  try { var k = localStorage.getItem("capstone8000-skin"); document.documentElement.setAttribute("data-skin", /^(paper|concrete|graphite|ink)$/.test(k) ? k : "paper"); }
+  catch (e) { document.documentElement.setAttribute("data-skin", "paper"); }
+</script>
+</head>
+<body>
+<header>
+  <h1>Capstone8000</h1>
+  <p>Add your team profile</p>
+  <nav><a href="index.html">Team</a><a href="index.html#ideas">Project Ideas</a><a href="profile.html" aria-current="page">Add Profile</a></nav>
+  <div class="skinbar" id="skinbar" role="group" aria-label="Theme">
+    <span>Theme</span>
+    <button class="skin" type="button" data-skin="paper" style="--sw1:#fff;--sw2:#111"><i></i>Paper</button>
+    <button class="skin" type="button" data-skin="concrete" style="--sw1:#d6d6d6;--sw2:#151515"><i></i>Concrete</button>
+    <button class="skin" type="button" data-skin="graphite" style="--sw1:#1c1c1e;--sw2:#ececec"><i></i>Graphite</button>
+    <button class="skin" type="button" data-skin="ink" style="--sw1:#000;--sw2:#fff"><i></i>Ink</button>
+  </div>
+</header>
+
+<main>
+  <form id="profile-form" novalidate>
+    <fieldset>
+      <legend>About you</legend>
+      <div class="cols">
+        <label>Last name <input id="lastName" required maxlength="60" autocomplete="family-name"></label>
+        <label>First name <input id="firstName" required maxlength="60" autocomplete="given-name"></label>
+      </div>
+      <div class="cols">
+        <label>Preferred name <span class="hint">What the team should call you (optional)</span>
+          <input id="preferredName" maxlength="60" autocomplete="nickname"></label>
+        <label>Country of origin <select id="country" required><option value="">Select a country…</option></select></label>
+      </div>
+      <div class="cols">
+        <label>Email address <span class="hint">Kept private, not shown on the team page</span>
+          <input id="email" type="email" required maxlength="120" autocomplete="email"></label>
+        <label>Date of birth <span class="hint">Kept private, not shown on the team page</span>
+          <input id="dob" type="date" required min="1900-01-01" autocomplete="bday"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Skills</legend>
+      <div class="add-row">
+        <select id="skill-select" aria-label="Choose a tech skill to add"></select>
+        <button type="button" class="ghost" id="skill-add">Add skill</button>
+      </div>
+      <p class="hint">Rate each skill from 1 to 5 stars in half-star steps. Click the left half of a star for .5, or use the arrow keys.</p>
+      <div class="list" id="skills-list" aria-live="polite"></div>
+      <p class="empty" id="skills-empty">No skills added yet.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Future goal</legend>
+      <label>Target job title
+        <input id="goal" required maxlength="80" placeholder="e.g. Senior AI Engineer, Data Architect, UX Lead">
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Years of experience</legend>
+      <div class="list" id="exp-list"></div>
+      <p class="empty" id="exp-empty">No companies added yet.</p>
+      <div><button type="button" class="ghost" id="exp-add">+ Add company</button></div>
+      <p class="total" id="exp-total"></p>
+    </fieldset>
+
+    <div>
+      <button type="submit" class="primary" id="save">Save profile</button>
+    </div>
+    <p id="status" role="status"></p>
+  </form>
+</main>
+
+<footer>
+  &copy; <span id="year"></span> Capstone8000 &middot;
+  <a href="https://github.com/kisshan2202/capstone8000">View on GitHub</a>
+</footer>
+
+<script>
+  (function () {
+    var bar = document.getElementById("skinbar");
+    function mark() { var c = document.documentElement.getAttribute("data-skin");
+      bar.querySelectorAll(".skin").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.skin === c); }); }
+    bar.addEventListener("click", function (e) {
+      var b = e.target.closest(".skin"); if (!b) return;
+      document.documentElement.setAttribute("data-skin", b.dataset.skin);
+      try { localStorage.setItem("capstone8000-skin", b.dataset.skin); } catch (err) {}
+      mark();
+    });
+    mark();
+  })();
+</script>
+<script type="module">
+import { firebaseConfig, PATHS } from "./firebase-config.js";
+
+const $ = id => document.getElementById(id);
+$("year").textContent = new Date().getFullYear();
+
+// ---------- reference data ----------
+const COUNTRIES = ("Afghanistan,Albania,Algeria,Andorra,Angola,Antigua and Barbuda,Argentina,Armenia,Australia,Austria,Azerbaijan,Bahamas,Bahrain,Bangladesh,Barbados,Belarus,Belgium,Belize,Benin,Bhutan,Bolivia,Bosnia and Herzegovina,Botswana,Brazil,Brunei,Bulgaria,Burkina Faso,Burundi,Cabo Verde,Cambodia,Cameroon,Canada,Central African Republic,Chad,Chile,China,Colombia,Comoros,Congo (Republic),Congo (Democratic Republic),Costa Rica,Côte d'Ivoire,Croatia,Cuba,Cyprus,Czechia,Denmark,Djibouti,Dominica,Dominican Republic,Ecuador,Egypt,El Salvador,Equatorial Guinea,Eritrea,Estonia,Eswatini,Ethiopia,Fiji,Finland,France,Gabon,Gambia,Georgia,Germany,Ghana,Greece,Grenada,Guatemala,Guinea,Guinea-Bissau,Guyana,Haiti,Honduras,Hungary,Iceland,India,Indonesia,Iran,Iraq,Ireland,Israel,Italy,Jamaica,Japan,Jordan,Kazakhstan,Kenya,Kiribati,Kosovo,Kuwait,Kyrgyzstan,Laos,Latvia,Lebanon,Lesotho,Liberia,Libya,Liechtenstein,Lithuania,Luxembourg,Madagascar,Malawi,Malaysia,Maldives,Mali,Malta,Marshall Islands,Mauritania,Mauritius,Mexico,Micronesia,Moldova,Monaco,Mongolia,Montenegro,Morocco,Mozambique,Myanmar,Namibia,Nauru,Nepal,Netherlands,New Zealand,Nicaragua,Niger,Nigeria,North Korea,North Macedonia,Norway,Oman,Pakistan,Palau,Palestine,Panama,Papua New Guinea,Paraguay,Peru,Philippines,Poland,Portugal,Qatar,Romania,Russia,Rwanda,Saint Kitts and Nevis,Saint Lucia,Saint Vincent and the Grenadines,Samoa,San Marino,São Tomé and Príncipe,Saudi Arabia,Senegal,Serbia,Seychelles,Sierra Leone,Singapore,Slovakia,Slovenia,Solomon Islands,Somalia,South Africa,South Korea,South Sudan,Spain,Sri Lanka,Sudan,Suriname,Sweden,Switzerland,Syria,Taiwan,Tajikistan,Tanzania,Thailand,Timor-Leste,Togo,Tonga,Trinidad and Tobago,Tunisia,Türkiye,Turkmenistan,Tuvalu,Uganda,Ukraine,United Arab Emirates,United Kingdom,United States,Uruguay,Uzbekistan,Vanuatu,Vatican City,Venezuela,Vietnam,Yemen,Zambia,Zimbabwe").split(",");
+
+const SKILLS = {
+  "Languages": ["Python","Java","Kotlin","Swift","JavaScript","TypeScript","C","C++","C#","Go","Rust","PHP","Ruby","R","SQL","Dart","Bash/Shell"],
+  "Web & Mobile": ["HTML/CSS","React","Angular","Vue.js","Node.js","Django","Flask","Spring Boot",".NET","Android","iOS","Flutter","React Native"],
+  "Data & AI": ["AI Engineering","Machine Learning","Deep Learning","Generative AI / LLMs","NLP","Computer Vision","Data Analytics","Data Engineering","Data Visualization","Pandas / NumPy","TensorFlow","PyTorch","Power BI","Tableau"],
+  "Databases": ["Databases","PostgreSQL","MySQL","MongoDB","Redis","Firebase","SQLite","Oracle","SQL Server"],
+  "Cloud & DevOps": ["AWS","Azure","Google Cloud","Docker","Kubernetes","CI/CD","Git","Linux","Terraform","Cybersecurity","Networking"],
+  "Automation & Integration": ["RPA","Process Automation","API Integration","REST APIs","GraphQL","Microservices","Software Testing / QA"],
+  "Design & Product": ["UX Design","User Research","Prototyping","Design Systems","Figma","Product Management","Agile / Scrum","Project Management"],
+  "Embedded & Automotive": ["Vehicle Diagnostics","Embedded Systems","IoT","CAN bus","AUTOSAR"]
+};
+
+// ---------- country + skill dropdowns ----------
+$("country").insertAdjacentHTML("beforeend", COUNTRIES.map(c => `<option>${c}</option>`).join(""));
+
+const skillSel = $("skill-select");
+function fillSkillSelect() {
+  const taken = new Set(skills.map(s => s.name));
+  skillSel.innerHTML = '<option value="">Select a skill to add…</option>' +
+    Object.entries(SKILLS).map(([g, list]) =>
+      `<optgroup label="${g}">${list.map(n => `<option value="${n}"${taken.has(n) ? " disabled" : ""}>${n}</option>`).join("")}</optgroup>`).join("");
+}
+
+// ---------- half-star widget (1 to 5, step 0.5) ----------
+function makeStars(value, onChange) {
+  const el = document.createElement("div");
+  el.className = "stars"; el.tabIndex = 0; el.setAttribute("role", "slider");
+  el.setAttribute("aria-valuemin", "1"); el.setAttribute("aria-valuemax", "5");
+  el.innerHTML = '<span class="star">★</span>'.repeat(5) + "<output></output>";
+  const stars = [...el.querySelectorAll(".star")], out = el.querySelector("output");
+  function paint() {
+    stars.forEach((s, i) => s.style.setProperty("--fill", Math.max(0, Math.min(1, value - i)) * 100 + "%"));
+    out.textContent = value.toFixed(1);
+    el.setAttribute("aria-valuenow", value);
+    el.setAttribute("aria-valuetext", value + " out of 5 stars");
+  }
+  function set(v) { value = Math.min(5, Math.max(1, Math.round(v * 2) / 2)); paint(); onChange(value); }
+  el.addEventListener("click", e => {
+    const s = e.target.closest(".star"); if (!s) return;
+    const r = s.getBoundingClientRect(), i = stars.indexOf(s);
+    set(i + (e.clientX - r.left < r.width / 2 ? 0.5 : 1));
+  });
+  el.addEventListener("keydown", e => {
+    const d = { ArrowRight:.5, ArrowUp:.5, ArrowLeft:-.5, ArrowDown:-.5 }[e.key];
+    if (d) { e.preventDefault(); set(value + d); }
+    else if (e.key === "Home") { e.preventDefault(); set(1); }
+    else if (e.key === "End") { e.preventDefault(); set(5); }
+  });
+  paint();
+  return el;
+}
+
+// ---------- skills block ----------
+let skills = [];   // [{name, rating}]
+function renderSkills() {
+  const list = $("skills-list");
+  list.replaceChildren();
+  skills.forEach((s, idx) => {
+    const item = document.createElement("div"); item.className = "item";
+    const nm = document.createElement("span"); nm.className = "nm"; nm.textContent = s.name;
+    const stars = makeStars(s.rating, v => { s.rating = v; });
+    stars.setAttribute("aria-label", "Rating for " + s.name);
+    const rm = document.createElement("button"); rm.type = "button"; rm.className = "danger"; rm.textContent = "Remove";
+    rm.setAttribute("aria-label", "Remove " + s.name);
+    rm.addEventListener("click", () => { skills.splice(idx, 1); renderSkills(); });
+    item.append(nm, stars, rm); list.append(item);
+  });
+  $("skills-empty").hidden = skills.length > 0;
+  fillSkillSelect();
+}
+$("skill-add").addEventListener("click", () => {
+  const name = skillSel.value; if (!name) return;
+  skills.push({ name, rating: 3 }); renderSkills();
+});
+
+// ---------- experience block ----------
+let exps = [];   // [{company, years}]
+function renderExps() {
+  const list = $("exp-list");
+  list.replaceChildren();
+  exps.forEach((x, idx) => {
+    const item = document.createElement("div"); item.className = "item exp";
+    const co = document.createElement("input"); co.type = "text"; co.maxLength = 80; co.value = x.company;
+    co.placeholder = "Company name"; co.setAttribute("aria-label", "Company " + (idx + 1));
+    co.addEventListener("input", () => { x.company = co.value; });
+    const yrs = document.createElement("label"); yrs.className = "yrs";
+    const yi = document.createElement("input"); yi.type = "number"; yi.min = "0"; yi.max = "60"; yi.step = "0.5";
+    yi.value = x.years; yi.placeholder = "0"; yi.setAttribute("aria-label", "Years at company " + (idx + 1));
+    yi.addEventListener("input", () => { x.years = yi.value; updateTotal(); });
+    yrs.append(yi, document.createTextNode("years"));
+    const rm = document.createElement("button"); rm.type = "button"; rm.className = "danger"; rm.textContent = "Remove";
+    rm.setAttribute("aria-label", "Remove company " + (idx + 1));
+    rm.addEventListener("click", () => { exps.splice(idx, 1); renderExps(); });
+    item.append(co, yrs, rm); list.append(item);
+  });
+  $("exp-empty").hidden = exps.length > 0;
+  updateTotal();
+}
+function totalYears() { return exps.reduce((t, x) => t + (parseFloat(x.years) || 0), 0); }
+function updateTotal() { $("exp-total").textContent = exps.length ? "Total experience: " + totalYears() + " years" : ""; }
+$("exp-add").addEventListener("click", () => {
+  exps.push({ company: "", years: "" }); renderExps();
+  $("exp-list").querySelector(".item:last-child input").focus();
+});
+
+// ---------- Firebase (loaded up front; the form says so if it cannot be reached) ----------
+let fb = null, db = null;
+const status = (msg, cls = "") => { const s = $("status"); s.textContent = msg; s.className = cls; };
+try {
+  const [a, d] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js")
+  ]);
+  fb = { ...a, ...d };
+  db = fb.getDatabase(fb.initializeApp(firebaseConfig));
+} catch {
+  $("save").disabled = true;
+  status("Could not reach the database service, so saving is unavailable right now. Please reload the page.", "err");
+}
+
+// ---------- validation + save ----------
+function validate() {
+  const v = id => $(id).value.trim();
+  if (!v("lastName") || !v("firstName")) return ["Please enter your last name and first name.", "lastName"];
+  if (!v("country")) return ["Please choose your country of origin.", "country"];
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email"))) return ["Please enter a valid email address.", "email"];
+  const dob = v("dob");
+  if (!dob || dob < "1900-01-01" || dob > new Date().toISOString().slice(0, 10)) return ["Please enter a valid date of birth (not in the future).", "dob"];
+  if (!skills.length) return ["Please add at least one skill.", "skill-select"];
+  if (!v("goal")) return ["Please enter your future goal as a job title.", "goal"];
+  for (const [i, x] of exps.entries()) {
+    const y = parseFloat(x.years);
+    if (!x.company.trim()) return [`Company ${i + 1} needs a name (or remove the row).`, null];
+    if (!(y >= 0 && y <= 60)) return [`Enter 0 to 60 years for "${x.company.trim()}".`, null];
+  }
+  return null;
+}
+
+$("profile-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const problem = validate();
+  if (problem) { status(problem[0], "err"); if (problem[1]) $(problem[1]).focus(); return; }
+  const v = id => $(id).value.trim();
+  const now = Date.now();
+  const pub = {
+    lastName: v("lastName"), firstName: v("firstName"), preferredName: v("preferredName"),
+    country: v("country"), goal: v("goal"),
+    skills: skills.map(s => ({ name: s.name, rating: s.rating })),
+    experience: exps.map(x => ({ company: x.company.trim(), years: parseFloat(x.years) })),
+    totalYears: totalYears(), ts: now
+  };
+  const priv = { email: v("email"), dob: v("dob"), ts: now };
+  $("save").disabled = true; status("Saving…");
+  try {
+    const id = fb.push(fb.ref(db, PATHS.profiles)).key;
+    await fb.update(fb.ref(db), { [PATHS.profiles + "/" + id]: pub, [PATHS.profilesPrivate + "/" + id]: priv });
+    $("profile-form").reset(); skills = []; exps = []; renderSkills(); renderExps();
+    status("Profile saved! It now appears on the team page.", "ok");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch {
+    status("Could not save. The database rules may not allow writing to these paths yet (see docs/firebase-rules.md).", "err");
+  }
+  $("save").disabled = false;
+});
+
+renderSkills(); renderExps();
+</script>
+</body>
+</html>
