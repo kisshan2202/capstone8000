@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monash Data App Prototype – Capstone8000</title>
+<style>
+  :root {
+    --brand:#006dae; --brand-fg:#fff; --brand-soft:#e1f0f9;
+    --page:#e9edf1; --bg:#f5f7f9; --card:#fff; --ink:#14202b; --muted:#5b6b78; --line:#dde3e8;
+    --c-ke:#0b8f6a; --c-ph:#6a55d6; --c-cl:#d97706; --danger:#c0392b; --ok:#0b8f6a;
+    --frame:#12161a; color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark) { :root {
+    --brand:#4aa8e0; --brand-fg:#06202f; --brand-soft:#12303f;
+    --page:#0b0e11; --bg:#14181c; --card:#1c2227; --ink:#e8eef2; --muted:#9aa8b3; --line:#2b343b;
+    --c-ke:#2fc592; --c-ph:#a08cff; --c-cl:#f0a43a; --frame:#000; color-scheme:dark; } }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--page); color:var(--ink);
+    min-height:100vh; display:grid; place-items:center; padding:16px; }
+  button { font:inherit; color:inherit; cursor:pointer; border:0; background:none; padding:0; }
+  button:focus-visible, input:focus-visible { outline:3px solid var(--brand); outline-offset:2px; }
+
+  /* ---- phone frame (desktop) / full screen (real phone) ---- */
+  .phone { width:390px; height:min(820px, calc(100vh - 32px)); background:var(--bg); border:10px solid var(--frame);
+    border-radius:46px; overflow:hidden; display:flex; flex-direction:column; position:relative; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+  .statusbar { flex:0 0 auto; display:flex; justify-content:space-between; padding:10px 22px 4px; font-size:.78rem; font-weight:700; background:var(--brand); color:var(--brand-fg); }
+  header.app { flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding:.55rem 1rem .8rem; background:var(--brand); color:var(--brand-fg); }
+  .logo { display:flex; align-items:center; justify-content:center; width:132px; height:40px; border:2px dashed currentColor; border-radius:8px;
+    font-size:.68rem; font-weight:800; letter-spacing:.06em; text-align:center; line-height:1.15; opacity:.95; }
+  .hdr-actions { display:flex; gap:.4rem; }
+  .chip { display:inline-flex; align-items:center; gap:.35rem; padding:.35rem .6rem; border-radius:999px; background:rgba(255,255,255,.18); color:inherit; font-size:.8rem; font-weight:600; border:1px solid rgba(255,255,255,.35); }
+  .chip svg { width:16px; height:16px; }
+  .screen { flex:1 1 auto; overflow-y:auto; overscroll-behavior:contain; padding:1rem 1rem 1.25rem; scroll-behavior:smooth; }
+  .hello h1 { margin:.2rem 0 .1rem; font-size:1.35rem; }
+  .hello p { margin:0 0 1rem; color:var(--muted); }
+
+  /* ---- section cards ---- */
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; margin-bottom:.8rem; overflow:hidden; }
+  .card-head { width:100%; display:flex; align-items:center; gap:.8rem; padding:.9rem 1rem; text-align:left; }
+  .card-ico { flex:0 0 42px; width:42px; height:42px; border-radius:12px; display:grid; place-items:center; background:var(--brand-soft); color:var(--brand); }
+  .card-ico svg { width:22px; height:22px; }
+  .card-txt { flex:1; min-width:0; }
+  .card-txt strong { display:block; font-size:1.02rem; }
+  .card-txt span { display:block; font-size:.85rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .badge { min-width:24px; height:24px; padding:0 .45rem; border-radius:999px; background:var(--danger); color:#fff; font-size:.78rem; font-weight:700; display:grid; place-items:center; }
+  .badge[hidden] { display:none; }
+  .chev { width:20px; height:20px; color:var(--muted); transition:transform .25s; flex:0 0 auto; }
+  .card.open .chev { transform:rotate(180deg); }
+  .panel { display:grid; grid-template-rows:0fr; transition:grid-template-rows .28s ease; }
+  .card.open .panel { grid-template-rows:1fr; }
+  .panel > div { overflow:hidden; min-height:0; }
+  .panel-in { padding:.2rem 1rem 1rem; border-top:1px solid var(--line); }
+  .card:not(.open) .panel-in { visibility:hidden; }
+  h3.sub { margin:.9rem 0 .4rem; font-size:.9rem; }
+  .note { font-size:.75rem; color:var(--muted); margin:.5rem 0 0; }
+
+  /* ---- dashboard ---- */
+  .chips { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.8rem; }
+  .fchip { padding:.35rem .75rem; border-radius:999px; border:1px solid var(--line); background:var(--bg); font-size:.85rem; font-weight:600; }
+  .fchip[aria-pressed="true"] { background:var(--brand); color:var(--brand-fg); border-color:var(--brand); }
+  .chart { background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:.5rem .5rem .3rem; }
+  .chart svg { display:block; width:100%; height:auto; }
+  .ax { fill:var(--muted); font:11px system-ui,sans-serif; }
+  .vl { fill:var(--ink); font:600 11px system-ui,sans-serif; }
+  .grid-l { stroke:var(--line); stroke-width:1; }
+  .share { margin-top:.5rem; display:inline-flex; align-items:center; gap:.4rem; padding:.45rem .8rem; border-radius:10px; background:var(--brand-soft); color:var(--brand); font-weight:700; font-size:.85rem; }
+  .share svg { width:16px; height:16px; }
+  .legend { display:flex; gap:.9rem; flex-wrap:wrap; font-size:.78rem; color:var(--muted); margin:.4rem 0 0; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:.3rem; }
+
+  /* ---- chat ---- */
+  .channels { display:flex; gap:.4rem; overflow-x:auto; padding:.8rem 0 .2rem; }
+  .thread { display:flex; flex-direction:column; gap:.5rem; margin:.7rem 0; min-height:120px; }
+  .msg { max-width:86%; padding:.5rem .7rem; border-radius:14px; background:var(--bg); border:1px solid var(--line); font-size:.9rem; }
+  .msg b { display:block; font-size:.75rem; color:var(--muted); margin-bottom:.1rem; }
+  .msg.me { align-self:flex-end; background:var(--brand); color:var(--brand-fg); border-color:var(--brand); }
+  .msg.me b { color:inherit; opacity:.85; }
+  .msg .att { margin-top:.35rem; padding:.4rem .5rem; border-radius:8px; background:rgba(0,0,0,.08); font-size:.8rem; display:flex; gap:.4rem; align-items:center; }
+  .msg .att svg { width:16px; height:16px; flex:0 0 auto; }
+  .composer { display:flex; gap:.4rem; }
+  .composer input { flex:1; min-width:0; font:inherit; padding:.6rem .8rem; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  .send { padding:.55rem .95rem; border-radius:999px; background:var(--brand); color:var(--brand-fg); font-weight:700; }
+
+  /* ---- my data ---- */
+  .sensor { display:flex; align-items:center; gap:.8rem; padding:.7rem 0; border-bottom:1px solid var(--line); }
+  .sensor:last-of-type { border-bottom:0; }
+  .sensor .nm { flex:1; min-width:0; }
+  .sensor .nm strong { display:block; font-size:.95rem; }
+  .sensor .nm span { font-size:.82rem; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .switch { position:relative; width:46px; height:26px; border-radius:999px; background:var(--line); transition:background .2s; flex:0 0 auto; }
+  .switch::after { content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+  .switch[aria-checked="true"] { background:var(--ok); }
+  .switch[aria-checked="true"]::after { transform:translateX(20px); }
+
+  /* ---- bottom tab bar + toast ---- */
+  .tabs { flex:0 0 auto; display:grid; grid-template-columns:repeat(4,1fr); background:var(--card); border-top:1px solid var(--line); padding:.3rem 0 .5rem; }
+  .tab { display:grid; justify-items:center; gap:.1rem; padding:.35rem 0; font-size:.7rem; font-weight:600; color:var(--muted); }
+  .tab svg { width:22px; height:22px; }
+  .tab[aria-current="page"] { color:var(--brand); }
+  .toast { position:absolute; left:50%; bottom:76px; transform:translate(-50%,20px); opacity:0; pointer-events:none; background:#12161a; color:#fff;
+    padding:.5rem .9rem; border-radius:999px; font-size:.82rem; transition:all .25s; white-space:nowrap; }
+  .toast.show { opacity:1; transform:translate(-50%,0); }
+
+  @media (max-width:480px) {
+    body { padding:0; display:block; }
+    .phone { width:100%; height:100dvh; border:0; border-radius:0; box-shadow:none; }
+    .statusbar { display:none; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="6" y="11" width="3" height="9" rx="1" fill="currentColor"/><rect x="11" y="5" width="3" height="15" rx="1" fill="currentColor"/><rect x="16" y="13" width="3" height="7" rx="1" fill="currentColor"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M12 7.5h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4M5 13v6h14v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="phone" id="phone">
+  <div class="statusbar" aria-hidden="true"><span>9:41</span><span>5G &nbsp;100%</span></div>
+
+  <header class="app">
+    <div class="logo" role="img" aria-label="Placeholder for the Monash logo">MONASH LOGO<br>PLACEHOLDER</div>
+    <div class="hdr-actions">
+      <button class="chip" id="chip-privacy" type="button" aria-label="Privacy: open My data"><svg><use href="#i-lock"/></svg><span id="chip-count">5 on</span></button>
+      <button class="chip" type="button" aria-label="About this app"><svg><use href="#i-info"/></svg></button>
+    </div>
+  </header>
+
+  <main class="screen" id="screen">
+    <div class="hello">
+      <h1>Hi, student</h1>
+      <p>Explore your data and learn together.</p>
+    </div>
+
+    <!-- Dashboard -->
+    <section class="card" id="card-dash">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="p-dash">
+        <span class="card-ico"><svg><use href="#i-chart"/></svg></span>
+        <span class="card-txt"><strong>Dashboard</strong><span>3 countries · sample data</span></span>
+        <span class="badge">3</span>
+        <svg class="chev"><use href="#i-chev"/></svg>
+      </button>
+      <div class="panel" id="p-dash"><div><div class="panel-in">
+        <div class="chips" role="group" aria-label="Filter by country" id="filters">
+          <button class="fchip" type="button" data-f="all" aria-pressed="true">All</button>
+          <button class="fchip" type="button" data-f="ke" aria-pressed="false">Kenya</button>
+          <button class="fchip" type="button" data-f="ph" aria-pressed="false">Philippines</button>
+          <button class="fchip" type="button" data-f="cl" aria-pressed="false">Chile</button>
+        </div>
+        <h3 class="sub">Average altitude by country (m)</h3>
+        <div class="chart" id="bar"></div>
+        <button class="share" type="button" data-share="Average altitude by country"><svg><use href="#i-share"/></svg>Share to chat</button>
+        <h3 class="sub">Movement vs altitude, per student</h3>
+        <div class="chart" id="scatter"></div>
+        <p class="legend"><span><i style="background:var(--c-ke)"></i>Kenya</span><span><i style="background:var(--c-ph)"></i>Philippines</span><span><i style="background:var(--c-cl)"></i>Chile</span></p>
+        <button class="share" type="button" data-share="Movement vs altitude"><svg><use href="#i-share"/></svg>Share to chat</button>
+        <p class="note">Sample data for the prototype only.</p>
+      </div></div></div>
+    </section>
+
+    <!-- Chat -->
+    <section class="card" id="card-chat">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="p-chat">
+        <span class="card-ico"><svg><use href="#i-chat"/></svg></span>
+        <span class="card-txt"><strong>Chat</strong><span id="chat-prev">2 new messages</span></span>
+        <span class="badge" id="chat-badge">2</span>
+        <svg class="chev"><use href="#i-chev"/></svg>
+      </button>
+      <div class="panel" id="p-chat"><div><div class="panel-in">
+        <div class="channels" role="group" aria-label="Channels" id="channels">
+          <button class="fchip" type="button" data-ch="class" aria-pressed="true">Class</button>
+          <button class="fchip" type="button" data-ch="ke" aria-pressed="false">Kenya</button>
+          <button class="fchip" type="button" data-ch="ph" aria-pressed="false">Philippines</button>
+          <button class="fchip" type="button" data-ch="cl" aria-pressed="false">Chile</button>
+        </div>
+        <div class="thread" id="thread" aria-live="polite"></div>
+        <form class="composer" id="composer">
+          <input id="msg-in" placeholder="Write a message…" aria-label="Message" maxlength="200" autocomplete="off">
+          <button class="send" type="submit">Send</button>
+        </form>
+        <p class="note">Sample messages. Nothing is sent or saved.</p>
+      </div></div></div>
+    </section>
+
+    <!-- My data -->
+    <section class="card" id="card-data">
+      <button class="card-head" type="button" aria-expanded="false" aria-controls="p-data">
+        <span class="card-ico"><svg><use href="#i-lock"/></svg></span>
+        <span class="card-txt"><strong>My data</strong><span id="data-prev">5 sensors on</span></span>
+        <svg class="chev"><use href="#i-chev"/></svg>
+      </button>
+      <div class="panel" id="p-data"><div><div class="panel-in" id="sensors">
+        <p class="note" style="margin-top:.7rem">You choose what to share. Turn any item off at any time.</p>
+      </div></div></div>
+    </section>
+  </main>
+
+  <nav class="tabs" aria-label="Main">
+    <button class="tab" type="button" data-go="top" aria-current="page"><svg><use href="#i-home"/></svg>Home</button>
+    <button class="tab" type="button" data-go="card-dash"><svg><use href="#i-chart"/></svg>Data</button>
+    <button class="tab" type="button" data-go="card-chat"><svg><use href="#i-chat"/></svg>Chat</button>
+    <button class="tab" type="button" data-go="card-data"><svg><use href="#i-gear"/></svg>Settings</button>
+  </nav>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script>
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var screen = $("#screen");
+
+  /* ---------- accordion cards (all hidden by default, independent) ---------- */
+  function setOpen(card, open) {
+    card.classList.toggle("open", open);
+    $(".card-head", card).setAttribute("aria-expanded", open);
+    var inner = $(".panel-in", card); if (open) inner.removeAttribute("inert"); else inner.setAttribute("inert", "");
+    if (open && card.id === "card-chat") clearUnread();
+  }
+  $$(".card").forEach(function (c) {
+    $(".panel-in", c).setAttribute("inert", "");
+    $(".card-head", c).addEventListener("click", function () { setOpen(c, !c.classList.contains("open")); });
+  });
+  function goTo(id) {
+    if (id === "top") { screen.scrollTo({ top: 0 }); return; }
+    var c = document.getElementById(id); setOpen(c, true);
+    setTimeout(function () { screen.scrollTo({ top: c.offsetTop - 8 }); }, 60);
+  }
+  $$(".tab").forEach(function (t) { t.addEventListener("click", function () {
+    $$(".tab").forEach(function (x) { x.removeAttribute("aria-current"); }); t.setAttribute("aria-current", "page"); goTo(t.dataset.go); }); });
+  $("#chip-privacy").addEventListener("click", function () { goTo("card-data"); });
+
+  var toastT; function toast(m) { var t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("show"); }, 1800); }
+
+  /* ---------- dashboard (sample data) ---------- */
+  var C = { ke:["Kenya","var(--c-ke)"], ph:["Philippines","var(--c-ph)"], cl:["Chile","var(--c-cl)"] };
+  var AVG = { ke:1650, ph:40, cl:520 };
+  var PTS = { ke:[[1500,6],[1620,8],[1720,5],[1780,9],[1560,4],[1690,7]],
+              ph:[[10,5],[30,7],[55,3],[70,8],[20,6],[45,4]],
+              cl:[[460,4],[510,6],[560,3],[600,7],[480,5],[530,2]] };
+  var filter = "all";
+  function dim(k) { return filter === "all" || filter === k ? 1 : 0.18; }
+  function drawBar() {
+    var s = '<svg viewBox="0 0 320 180" role="img" aria-label="Bar chart of average altitude by country: Kenya 1650 m, Philippines 40 m, Chile 520 m">';
+    [0, 1000, 2000].forEach(function (v) { var y = 140 - v * 0.06; s += '<line class="grid-l" x1="36" x2="312" y1="' + y + '" y2="' + y + '"/><text class="ax" x="30" y="' + (y + 4) + '" text-anchor="end">' + v + '</text>'; });
+    ["ke", "ph", "cl"].forEach(function (k, i) { var h = AVG[k] * 0.06, x = 60 + i * 85;
+      s += '<rect x="' + x + '" y="' + (140 - h) + '" width="56" height="' + h + '" rx="5" fill="' + C[k][1] + '" opacity="' + dim(k) + '"/>' +
+           '<text class="vl" x="' + (x + 28) + '" y="' + (134 - h) + '" text-anchor="middle" opacity="' + dim(k) + '">' + AVG[k] + '</text>' +
+           '<text class="ax" x="' + (x + 28) + '" y="160" text-anchor="middle">' + C[k][0] + '</text>'; });
+    $("#bar").innerHTML = s + "</svg>";
+  }
+  function drawScatter() {
+    var s = '<svg viewBox="0 0 320 190" role="img" aria-label="Scatter chart of movement against altitude for each student">';
+    [0, 5, 10].forEach(function (v) { var y = 150 - v * 12; s += '<line class="grid-l" x1="36" x2="312" y1="' + y + '" y2="' + y + '"/><text class="ax" x="30" y="' + (y + 4) + '" text-anchor="end">' + v + '</text>'; });
+    [0, 1000, 2000].forEach(function (v) { var x = 40 + v * 0.125; s += '<text class="ax" x="' + x + '" y="168" text-anchor="middle">' + v + '</text>'; });
+    s += '<text class="ax" x="176" y="186" text-anchor="middle">Altitude (m)</text><text class="ax" x="36" y="12">Movement</text>';
+    Object.keys(PTS).forEach(function (k) { PTS[k].forEach(function (p) {
+      s += '<circle cx="' + (40 + p[0] * 0.125) + '" cy="' + (150 - p[1] * 12) + '" r="6" fill="' + C[k][1] + '" opacity="' + (dim(k) === 1 ? 0.9 : 0.15) + '"/>'; }); });
+    $("#scatter").innerHTML = s + "</svg>";
+  }
+  $$("#filters .fchip").forEach(function (b) { b.addEventListener("click", function () {
+    filter = b.dataset.f; $$("#filters .fchip").forEach(function (x) { x.setAttribute("aria-pressed", x === b); }); drawBar(); drawScatter(); }); });
+  drawBar(); drawScatter();
+
+  /* ---------- chat (sample messages, local only) ---------- */
+  var MSGS = [
+    { ch:"class", who:"Amara", t:"Has anyone looked at the altitude chart yet?" },
+    { ch:"class", who:"Mateo", t:"Santiago sits higher than I expected!" },
+    { ch:"ke", who:"Wanjiru", t:"Nairobi is around 1,700 m, so that fits." },
+    { ch:"ph", who:"Joy", t:"Manila is basically sea level, ha." },
+    { ch:"cl", who:"Camila", t:"Anyone up for the weekly challenge?" }
+  ];
+  var ch = "class";
+  function drawThread() {
+    var h = ""; MSGS.filter(function (m) { return m.ch === ch; }).forEach(function (m) {
+      h += '<div class="msg' + (m.me ? " me" : "") + '"><b>' + m.who + '</b>' + esc(m.t) +
+           (m.att ? '<div class="att"><svg><use href="#i-chart"/></svg>' + esc(m.att) + '</div>' : "") + '</div>'; });
+    $("#thread").innerHTML = h || '<p class="note">No messages here yet.</p>';
+    $("#thread").scrollTop = 1e6;
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+  $$("#channels .fchip").forEach(function (b) { b.addEventListener("click", function () {
+    ch = b.dataset.ch; $$("#channels .fchip").forEach(function (x) { x.setAttribute("aria-pressed", x === b); }); drawThread(); }); });
+  $("#composer").addEventListener("submit", function (e) { e.preventDefault(); var v = $("#msg-in").value.trim(); if (!v) return;
+    MSGS.push({ ch:ch, who:"You", t:v, me:true }); $("#msg-in").value = ""; drawThread(); });
+  $$(".share").forEach(function (b) { b.addEventListener("click", function () {
+    MSGS.push({ ch:"class", who:"You", t:"Take a look at this chart", att:b.dataset.share, me:true }); drawThread(); toast("Shared to Class chat"); }); });
+  function clearUnread() { $("#chat-badge").hidden = true; $("#chat-prev").textContent = "Class, Kenya, Philippines, Chile"; }
+  drawThread();
+
+  /* ---------- my data (sample readings, nothing is collected) ---------- */
+  var SENS = [
+    ["Location", "Approximate area", "Santiago, Chile"],
+    ["Provider", "Mobile network", "Sample Telecom"],
+    ["IP address", "Hidden from classmates", "203.0.113.x"],
+    ["Accelerometer", "Movement", "0.12 g"],
+    ["Altitude", "Height above sea level", "532 m"]
+  ];
+  var sens = $("#sensors"), on = SENS.map(function () { return true; });
+  function drawSensors() {
+    var h = ""; SENS.forEach(function (s, i) { h += '<div class="sensor"><div class="nm"><strong>' + s[0] + '</strong><span>' + (on[i] ? s[2] : "Not shared") + '</span></div>' +
+      '<button class="switch" type="button" role="switch" aria-checked="' + on[i] + '" aria-label="Share ' + s[0] + '" data-i="' + i + '"></button></div>'; });
+    var note = sens.querySelector(".note"); sens.innerHTML = ""; sens.insertAdjacentHTML("beforeend", note.outerHTML + h);
+    var n = on.filter(Boolean).length; $("#chip-count").textContent = n + " on"; $("#data-prev").textContent = n + " of 5 sensors on";
+    $$(".switch", sens).forEach(function (b) { b.addEventListener("click", function () { on[+b.dataset.i] = !on[+b.dataset.i]; drawSensors(); $$(".switch", sens)[+b.dataset.i].focus(); }); });
+  }
+  drawSensors();
+})();
+</script>
+</body>
+</html>
