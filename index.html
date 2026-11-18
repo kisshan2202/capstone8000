@@ -74,6 +74,13 @@
     -webkit-background-clip:text; background-clip:text; }
   .skillrow { display:flex; align-items:center; gap:.5rem; margin:.1rem 0; flex-wrap:wrap; }
   .skillrow .tag { margin:0; }
+  .quick { border-bottom:2px solid var(--rule); background:var(--surface); }
+  .quick-in { max-width:1100px; margin:0 auto; padding:.8rem 1rem; display:flex; flex-wrap:wrap; align-items:center; gap:.6rem 1rem; }
+  .quick-in > strong { font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .quick-link { display:flex; flex-direction:column; gap:.1rem; padding:.5rem .9rem; border:2px solid var(--rule); background:var(--bg); color:var(--ink); text-decoration:none; min-width:200px; }
+  .quick-link b { font-size:.95rem; } .quick-link span { font-size:.8rem; color:var(--muted); }
+  .quick-link:hover, .quick-link:focus-visible { background:var(--accent); color:var(--accent-fg); }
+  .quick-link:hover span, .quick-link:focus-visible span { color:inherit; }
   footer { background:var(--hdr-bg); color:var(--hdr-fg); border-top:2px solid var(--rule); text-align:center; padding:1.25rem 1rem; font-size:.9rem; }
   footer a { color:var(--hdr-fg); }
 </style>
@@ -96,6 +103,14 @@
     <button class="skin" type="button" data-skin="ink" style="--sw1:#000;--sw2:#fff"><i></i>Ink</button>
   </div>
 </header>
+
+<aside class="quick" aria-label="Week 2 links">
+  <div class="quick-in">
+    <strong>Week 2</strong>
+    <a class="quick-link" href="week2/index.html"><b>Week 2 requirements</b><span>Problem, solution and system overview</span></a>
+    <a class="quick-link" href="week2/monash.html"><b>App prototype</b><span>Mobile screen mock-up</span></a>
+  </div>
+</aside>
 
 <main>
   <h2 class="section" id="team">Team Profiles</h2>
