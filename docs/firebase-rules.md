@@ -18,7 +18,7 @@ existing rules for the rest of the project (the project is shared with other app
 "capstone8000_profiles": {
   ".read": true,
   "$id": {
-    ".write": "!data.exists()",
+    ".write": "newData.exists()",
     ".validate": "newData.hasChildren(['lastName','firstName','country','goal','skills','ts'])",
     "lastName":      { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
     "firstName":     { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
@@ -34,7 +34,7 @@ existing rules for the rest of the project (the project is shared with other app
 "capstone8000_profiles_private": {
   ".read": false,
   "$id": {
-    ".write": "!data.exists()",
+    ".write": "newData.exists()",
     "email": { ".validate": "newData.isString() && newData.val().length <= 120" },
     "dob":   { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)" },
     "ts":    { ".validate": "newData.isNumber()" }
@@ -42,5 +42,6 @@ existing rules for the rest of the project (the project is shared with other app
 }
 ```
 
-`".write": "!data.exists()"` lets visitors create a profile but not overwrite or delete an existing one.
-Without authentication, anyone with the link can still create profiles, so treat this as a light safeguard.
+`".write": "newData.exists()"` lets visitors create a profile and edit an existing one, but not delete it.
+Profile editing needs these rules: if you pasted the earlier version (`!data.exists()`), edits are refused until you switch to this one.
+There is no login yet, so anyone with the link can create or edit profiles, the same as the Ideas section. Treat this as a light safeguard; real ownership checks need sign-in.
