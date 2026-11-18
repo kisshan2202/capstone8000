@@ -1,6 +1,8 @@
 # capstone8000
 https://kisshan2202.github.io/capstone8000/
 
+https://kisshan2202.github.io/capstone8000/week2/index.html
+
 ## Structure
 
 - `src/` – application source
