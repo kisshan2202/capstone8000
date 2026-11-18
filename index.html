@@ -72,6 +72,10 @@
   .stars-ro { display:inline-block; font-size:1.05rem; letter-spacing:.05em; color:transparent; vertical-align:middle;
     background:linear-gradient(90deg,var(--title) calc(var(--v) / 5 * 100%),color-mix(in srgb,var(--muted) 45%,transparent) 0);
     -webkit-background-clip:text; background-clip:text; }
+  #profiles .card-head { display:flex; align-items:center; gap:.75rem; }
+  #profiles .card-head h3 { flex:1; min-width:0; overflow-wrap:anywhere; }
+  #profiles .card-head .avatar { margin-right:0; flex:0 0 44px; }
+  #profiles .card-head .ghost { flex:0 0 auto; padding:.35rem .75rem; font-size:.85rem; }
   .skillrow { display:flex; align-items:center; gap:.5rem; margin:.1rem 0; flex-wrap:wrap; }
   .skillrow .tag { margin:0; }
   .quick { border-bottom:2px solid var(--rule); background:var(--surface); }
@@ -188,7 +192,7 @@ function parseDetails(text) {
 
 // Two sources are merged: profiles saved through profile.html (database) and the legacy "details" file.
 // Both are normalised to {name, from, skills:[{name, rating?}], experience:[html-safe strings], hobbies, goal}.
-let filePeople = [], dbPeople = [];
+let filePeople = [], dbPeople = [], shown = [];
 
 const stars = r => `<span class="stars-ro" style="--v:${Number(r)}" role="img" aria-label="${Number(r)} out of 5 stars">★★★★★</span>`;
 const skillRows = list => list.map(s => s.rating
@@ -197,9 +201,9 @@ const skillRows = list => list.map(s => s.rating
 
 function normFile(p) {
   return { name:p.name, from:p.from, skills:p.skills.map(name => ({ name })), experience:p.experience.map(esc),
-           hobbies:p.hobbies, goal:p.future, aliases:[p.name] };
+           hobbies:p.hobbies, goal:p.future, aliases:[p.name], raw:p, key:null };
 }
-function normDb(d) {
+function normDb(d, id) {
   const first = d.firstName || "", last = d.lastName || "", pref = d.preferredName || "";
   const arr = v => Array.isArray(v) ? v : (v && typeof v === "object" ? Object.values(v) : []);
   return {
@@ -208,8 +212,8 @@ function normDb(d) {
     skills:arr(d.skills).filter(s => s && s.name),
     experience:arr(d.experience).filter(x => x && x.company).map(x => `${esc(x.company)} <small>(${Number(x.years) || 0} yr${Number(x.years) === 1 ? "" : "s"})</small>`),
     total:Number(d.totalYears) || 0,
-    hobbies:[], goal:d.goal || "",
-    aliases:[[first, last].join(" "), [pref, last].join(" ")]
+    hobbies:arr(d.hobbies).filter(Boolean).map(String), goal:d.goal || "", key:id,
+    aliases:[[first, last].join(" "), [pref, last].join(" "), d.replaces || ""]
   };
 }
 const norm = s => s.toLowerCase().replace(/\s+/g, " ").trim();
@@ -219,9 +223,10 @@ function renderProfiles() {
   const seen = new Set(dbPeople.flatMap(p => p.aliases.map(norm)));
   const people = [...dbPeople, ...filePeople.filter(p => !seen.has(norm(p.name)))];
   const opt = (k, v, html) => v && v.length ? row(k, html) : "";
-  $("profiles").innerHTML = people.length ? people.map(p => `
+  shown = people;
+  $("profiles").innerHTML = people.length ? people.map((p, i) => `
     <article class="card">
-      <div class="card-head"><span class="avatar">${esc(p.name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase())}</span><h3 class="pname" style="display:inline">${esc(p.name)}</h3></div>
+      <div class="card-head"><span class="avatar">${esc(p.name.split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase())}</span><h3 class="pname">${esc(p.name)}</h3><button class="ghost" type="button" data-edit="${i}" aria-label="Edit profile of ${esc(p.name)}">Edit</button></div>
       ${opt("From", p.from, esc(p.from))}
       ${opt("Skills", p.skills, skillRows(p.skills))}
       ${opt("Experience", p.experience, p.experience.join("<br>") + (p.total ? `<br><small>Total: ${p.total} years</small>` : ""))}
@@ -229,6 +234,15 @@ function renderProfiles() {
       ${opt("Goal", p.goal, esc(p.goal))}
     </article>`).join("") : '<p class="empty">No profiles yet. <a href="profile.html">Add yours</a>.</p>';
 }
+
+// Edit: a database profile opens the form by id; a profile from the details file hands its data to the form through sessionStorage.
+$("profiles").addEventListener("click", e => {
+  const b = e.target.closest("[data-edit]"); if (!b) return;
+  const p = shown[+b.dataset.edit]; if (!p) return;
+  if (p.key) { location.href = "profile.html?edit=" + encodeURIComponent(p.key); return; }
+  try { sessionStorage.setItem("capstone8000-edit", JSON.stringify(p.raw)); } catch {}
+  location.href = "profile.html?edit=legacy";
+});
 
 fetch("details", { cache:"no-store" })
   .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
@@ -253,7 +267,7 @@ if (!fb) {
   const db = getDatabase(app);
   const ideasRef = ref(db, PATHS.ideas);
   onValue(ref(db, PATHS.profiles), snap => {          // public profile data only (email/DOB live elsewhere)
-    dbPeople = Object.values(snap.val() || {}).sort((a, b) => (a.ts || 0) - (b.ts || 0)).map(normDb);
+    dbPeople = Object.entries(snap.val() || {}).sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0)).map(([id, d]) => normDb(d, id));
     renderProfiles();
   }, () => {});
   let ideas = [];

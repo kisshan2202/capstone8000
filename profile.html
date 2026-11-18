@@ -18,6 +18,7 @@
     --accent:#fff; --accent-fg:#000; --accent-hover:#ddd; --hdr-bg:#000; --hdr-fg:#fff;
     --name:#7fb0ff; --title:#ffc062; --err:#ff8a9b; color-scheme:dark; }
   * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
   body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; }
   header { background:var(--hdr-bg); color:var(--hdr-fg); padding:2rem 1rem 1.25rem; text-align:center; border-bottom:2px solid var(--rule); }
   header h1 { margin:0 0 .4rem; font-size:2rem; }
@@ -61,6 +62,8 @@
     -webkit-background-clip:text; background-clip:text; }
   .stars output { margin-left:.5rem; font-size:.9rem; font-weight:700; min-width:2.2em; }
 
+  .btn-link { display:inline-block; text-decoration:none; padding:.55rem .9rem; margin-left:.5rem; font-weight:600; border:1px solid var(--rule); color:var(--ink); }
+  .modenote { margin:0 0 1rem; padding:.7rem .9rem; border:2px solid var(--rule); background:var(--surface); font-size:.9rem; line-height:1.45; }
   #status { margin:0; font-weight:600; min-height:1.4em; }
   #status.err { color:var(--err); } #status.ok { color:var(--name); }
   .skinbar { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.4rem; justify-content:center; align-items:center; font-size:.8rem; }
@@ -77,7 +80,7 @@
 <body>
 <header>
   <h1>Capstone8000</h1>
-  <p>Add your team profile</p>
+  <p id="sub">Add your team profile</p>
   <nav><a href="index.html">Team</a><a href="index.html#ideas">Project Ideas</a><a href="profile.html" aria-current="page">Add Profile</a></nav>
   <div class="skinbar" id="skinbar" role="group" aria-label="Theme">
     <span>Theme</span>
@@ -89,6 +92,7 @@
 </header>
 
 <main>
+  <p class="modenote" id="mode-note" role="status" hidden></p>
   <form id="profile-form" novalidate>
     <fieldset>
       <legend>About you</legend>
@@ -102,11 +106,13 @@
         <label>Country of origin <select id="country" required><option value="">Select a country…</option></select></label>
       </div>
       <div class="cols">
-        <label>Email address <span class="hint">Kept private, not shown on the team page</span>
+        <label>Email address <span class="hint" id="em-hint">Kept private, not shown on the team page</span>
           <input id="email" type="email" required maxlength="120" autocomplete="email"></label>
-        <label>Date of birth <span class="hint">Kept private, not shown on the team page</span>
+        <label>Date of birth <span class="hint" id="dob-hint">Kept private, not shown on the team page</span>
           <input id="dob" type="date" required min="1900-01-01" autocomplete="bday"></label>
       </div>
+      <label>Hobbies <span class="hint">Optional, separated by commas</span>
+        <input id="hobbies" maxlength="160" placeholder="e.g. Soccer, Running, Chess"></label>
     </fieldset>
 
     <fieldset>
@@ -137,6 +143,7 @@
 
     <div>
       <button type="submit" class="primary" id="save">Save profile</button>
+      <a class="ghost btn-link" id="cancel" href="index.html#team" hidden>Cancel</a>
     </div>
     <p id="status" role="status"></p>
   </form>
@@ -176,7 +183,7 @@ const SKILLS = {
   "Data & AI": ["AI Engineering","Machine Learning","Deep Learning","Generative AI / LLMs","NLP","Computer Vision","Data Analytics","Data Engineering","Data Visualization","Pandas / NumPy","TensorFlow","PyTorch","Power BI","Tableau"],
   "Databases": ["Databases","PostgreSQL","MySQL","MongoDB","Redis","Firebase","SQLite","Oracle","SQL Server"],
   "Cloud & DevOps": ["AWS","Azure","Google Cloud","Docker","Kubernetes","CI/CD","Git","Linux","Terraform","Cybersecurity","Networking"],
-  "Automation & Integration": ["RPA","Process Automation","API Integration","REST APIs","GraphQL","Microservices","Software Testing / QA"],
+  "Automation & Integration": ["RPA","Process Automation","API Integration","REST APIs","GraphQL","Microservices","Software Testing / QA","Software Development"],
   "Design & Product": ["UX Design","User Research","Prototyping","Design Systems","Figma","Product Management","Agile / Scrum","Project Management"],
   "Embedded & Automotive": ["Vehicle Diagnostics","Embedded Systems","IoT","CAN bus","AUTOSAR"]
 };
@@ -289,14 +296,77 @@ try {
   status("Could not reach the database service, so saving is unavailable right now. Please reload the page.", "err");
 }
 
+// ---------- modes: add (default) | edit an existing profile (?edit=<id>) | move a profile from the "details" file (?edit=legacy) ----------
+const editParam = new URLSearchParams(location.search).get("edit");
+const MODE = !editParam ? "add" : editParam === "legacy" ? "legacy" : "edit";
+let legacyName = "";
+const arrOf = v => Array.isArray(v) ? v.filter(Boolean) : (v && typeof v === "object" ? Object.values(v).filter(Boolean) : []);
+
+function fillForm(d) {
+  $("lastName").value = d.lastName || ""; $("firstName").value = d.firstName || ""; $("preferredName").value = d.preferredName || "";
+  $("country").value = COUNTRIES.includes(d.country) ? d.country : "";
+  $("goal").value = d.goal || ""; $("hobbies").value = arrOf(d.hobbies).join(", ");
+  skills = arrOf(d.skills).filter(x => x.name).map(x => ({ name: String(x.name), rating: Math.min(5, Math.max(1, Math.round((Number(x.rating) || 3) * 2) / 2)) }));
+  exps = arrOf(d.experience).filter(x => x.company).map(x => ({ company: String(x.company), years: x.years == null ? "" : String(x.years) }));
+  renderSkills(); renderExps();
+}
+
+// A profile that only lives in the "details" file is mapped onto the form as well as possible; the person reviews it before saving.
+function fromLegacy(r) {
+  const parts = (r.name || "").trim().split(/\s+/), first = parts.shift() || "", last = parts.join(" ");
+  const from = (r.from || "").toLowerCase(), country = COUNTRIES.find(c => from.includes(c.toLowerCase())) || "";
+  const ALL = Object.values(SKILLS).flat(), SYN = { "database":"Databases", "ai":"AI Engineering", "ai engineer":"AI Engineering" };
+  const found = [], missed = [];
+  for (const raw of r.skills || []) {
+    const k = raw.trim().toLowerCase(), hit = ALL.find(n => n.toLowerCase() === (SYN[k] || k).toLowerCase());
+    if (!hit) missed.push(raw.trim()); else if (!found.includes(hit)) found.push(hit);
+  }
+  const experience = (r.experience || []).filter(x => x.trim() && !/^total\b/i.test(x.trim())).map(x => {
+    const y = /(\d+(?:\.\d+)?)\s*\+?\s*(?:years?|yrs?)/i.exec(x), mo = /(\d+)\s*months?/i.exec(x);
+    const yrs = Math.round(((y ? parseFloat(y[1]) : 0) + (mo ? parseInt(mo[1], 10) / 12 : 0)) * 2) / 2;
+    return { company: x.trim().slice(0, 80), years: (y || mo) ? yrs : "" };
+  });
+  return { firstName:first, lastName:last, country, goal:(r.future || r.goal || "").slice(0, 80),
+           skills:found.map(name => ({ name, rating:3 })), experience, hobbies:r.hobbies || [], missed };
+}
+
+async function initMode() {
+  if (MODE === "add") return;
+  document.title = "Edit Profile – Capstone8000";
+  $("sub").textContent = "Edit your team profile";
+  const cur = document.querySelector("nav a[aria-current]"); if (cur) cur.removeAttribute("aria-current");
+  $("cancel").hidden = false;
+  const note = $("mode-note"); note.hidden = false;
+  if (MODE === "legacy") {
+    let raw = null; try { raw = JSON.parse(sessionStorage.getItem("capstone8000-edit") || "null"); } catch {}
+    if (!raw) { note.textContent = "We couldn't find that profile. Open it with the Edit button on the team page, or fill in the form to add a new one."; return; }
+    legacyName = raw.name || ""; const d = fromLegacy(raw); fillForm(d);
+    $("save").textContent = "Save profile";
+    note.textContent = "This profile comes from the team file. Check each section, fill in anything missing (for example years at each company, email and date of birth), then save. It moves into the database and replaces the old card."
+      + (d.missed.length ? " Skills that aren't in the list yet: " + d.missed.join(", ") + "." : "");
+  } else {
+    $("save").textContent = "Save changes";
+    $("em-hint").textContent = "Optional. Leave blank to keep what you saved before.";
+    $("dob-hint").textContent = "Optional. Leave blank to keep what you saved before.";
+    note.textContent = "Change any section and save. Your changes appear on the team page straight away.";
+    if (!db) return;
+    $("save").disabled = true; status("Loading your profile…");
+    try {
+      const snap = await fb.get(fb.ref(db, PATHS.profiles + "/" + editParam));
+      if (!snap.exists()) { status("That profile wasn't found. It may have been removed.", "err"); return; }
+      fillForm(snap.val()); status(""); $("save").disabled = false;
+    } catch { status("Could not load the profile. Check your connection and the database rules, then reload.", "err"); }
+  }
+}
+
 // ---------- validation + save ----------
 function validate() {
   const v = id => $(id).value.trim();
   if (!v("lastName") || !v("firstName")) return ["Please enter your last name and first name.", "lastName"];
   if (!v("country")) return ["Please choose your country of origin.", "country"];
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email"))) return ["Please enter a valid email address.", "email"];
-  const dob = v("dob");
-  if (!dob || dob < "1900-01-01" || dob > new Date().toISOString().slice(0, 10)) return ["Please enter a valid date of birth (not in the future).", "dob"];
+  const editing = MODE === "edit", dob = v("dob");   // when editing, email and date of birth only need checking if filled in
+  if ((!editing || v("email")) && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email"))) return ["Please enter a valid email address.", "email"];
+  if ((!editing || dob) && (!dob || dob < "1900-01-01" || dob > new Date().toISOString().slice(0, 10))) return ["Please enter a valid date of birth (not in the future).", "dob"];
   if (!skills.length) return ["Please add at least one skill.", "skill-select"];
   if (!v("goal")) return ["Please enter your future goal as a job title.", "goal"];
   for (const [i, x] of exps.entries()) {
@@ -313,27 +383,44 @@ $("profile-form").addEventListener("submit", async e => {
   if (problem) { status(problem[0], "err"); if (problem[1]) $(problem[1]).focus(); return; }
   const v = id => $(id).value.trim();
   const now = Date.now();
-  const pub = {
+  const fields = {
     lastName: v("lastName"), firstName: v("firstName"), preferredName: v("preferredName"),
     country: v("country"), goal: v("goal"),
+    hobbies: v("hobbies").split(",").map(h => h.trim().slice(0, 30)).filter(Boolean).slice(0, 8),
     skills: skills.map(s => ({ name: s.name, rating: s.rating })),
     experience: exps.map(x => ({ company: x.company.trim(), years: parseFloat(x.years) })),
-    totalYears: totalYears(), ts: now
+    totalYears: totalYears()
   };
-  const priv = { email: v("email"), dob: v("dob"), ts: now };
+  const goHome = msg => { status(msg, "ok"); setTimeout(() => { location.href = "index.html#team"; }, 900); };
   $("save").disabled = true; status("Saving…");
   try {
+    if (MODE === "edit") {
+      // field-by-field update, so nothing else on the profile (such as when it was created) is touched
+      const base = PATHS.profiles + "/" + editParam, priv = PATHS.profilesPrivate + "/" + editParam, upd = {};
+      for (const [k, val] of Object.entries(fields)) upd[base + "/" + k] = val;
+      upd[base + "/updatedAt"] = now;
+      if (v("email")) upd[priv + "/email"] = v("email");
+      if (v("dob")) upd[priv + "/dob"] = v("dob");
+      if (v("email") || v("dob")) upd[priv + "/updatedAt"] = now;
+      await fb.update(fb.ref(db), upd);
+      goHome("Saved! Taking you back to the team page…");
+      return;
+    }
     const id = fb.push(fb.ref(db, PATHS.profiles)).key;
-    await fb.update(fb.ref(db), { [PATHS.profiles + "/" + id]: pub, [PATHS.profilesPrivate + "/" + id]: priv });
+    const pub = { ...fields, ts: now }; if (MODE === "legacy" && legacyName) pub.replaces = legacyName;
+    await fb.update(fb.ref(db), { [PATHS.profiles + "/" + id]: pub, [PATHS.profilesPrivate + "/" + id]: { email: v("email"), dob: v("dob"), ts: now } });
+    if (MODE === "legacy") { try { sessionStorage.removeItem("capstone8000-edit"); } catch {} goHome("Profile saved! Taking you back to the team page…"); return; }
     $("profile-form").reset(); skills = []; exps = []; renderSkills(); renderExps();
     status("Profile saved! It now appears on the team page.", "ok");
     window.scrollTo({ top: 0, behavior: "smooth" });
   } catch {
-    status("Could not save. The database rules may not allow writing to these paths yet (see docs/firebase-rules.md).", "err");
+    status(MODE === "add" ? "Could not save. The database rules may not allow writing to these paths yet (see docs/firebase-rules.md)."
+                          : "Could not save changes. The database rules may not allow edits yet (see docs/firebase-rules.md).", "err");
   }
   $("save").disabled = false;
 });
 
+await initMode();
 renderSkills(); renderExps();
 </script>
 </body>
