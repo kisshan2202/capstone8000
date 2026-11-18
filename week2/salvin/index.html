@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salvin's Prototype – Capstone8000</title>
+<style>
+  :root, html[data-skin="paper"] { --bg:#fff; --surface:#fff; --ink:#000; --muted:#555; --rule:#000; --soft:#ddd;
+    --accent:#000; --accent-fg:#fff; --hdr-bg:#000; --hdr-fg:#fff; color-scheme:light; }
+  html[data-skin="concrete"] { --bg:#d6d6d6; --surface:#eee; --ink:#151515; --muted:#4a4a4a; --rule:#151515; --soft:#bbb;
+    --accent:#151515; --accent-fg:#eee; --hdr-bg:#151515; --hdr-fg:#eee; color-scheme:light; }
+  html[data-skin="graphite"] { --bg:#1c1c1e; --surface:#26262a; --ink:#ececec; --muted:#a3a3a8; --rule:#8a8a90; --soft:#3a3a3e;
+    --accent:#ececec; --accent-fg:#1c1c1e; --hdr-bg:#0e0e10; --hdr-fg:#ececec; color-scheme:dark; }
+  html[data-skin="ink"] { --bg:#000; --surface:#0b0b0b; --ink:#fff; --muted:#9a9a9a; --rule:#bdbdbd; --soft:#262626;
+    --accent:#fff; --accent-fg:#000; --hdr-bg:#000; --hdr-fg:#fff; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; }
+  header { background:var(--hdr-bg); color:var(--hdr-fg); padding:2rem 1rem 1.25rem; text-align:center; border-bottom:2px solid var(--rule); }
+  header h1 { margin:0 0 .4rem; font-size:2rem; }
+  header p { margin:0; opacity:.9; }
+  nav { margin-top:1rem; }
+  nav a { color:var(--hdr-fg); text-decoration:none; margin:0 .75rem; font-weight:600; border-bottom:2px solid transparent; }
+  nav a:hover, nav a[aria-current] { border-color:var(--hdr-fg); }
+  main { flex:1; width:100%; max-width:1100px; margin:0 auto; padding:1.75rem 1rem 3rem; }
+  .screens { display:grid; gap:1.5rem; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); align-items:start; }
+  figure { margin:0; text-align:center; }
+  figure a { display:block; border:2px solid var(--rule); border-radius:28px; overflow:hidden; background:#fff; box-shadow:0 14px 30px -18px rgba(0,0,0,.5); }
+  figure a:focus-visible { outline:3px solid var(--ink); outline-offset:3px; }
+  figure img { display:block; width:100%; height:auto; }
+  figcaption { margin-top:.7rem; font-weight:700; }
+  footer { background:var(--hdr-bg); color:var(--hdr-fg); border-top:2px solid var(--rule); text-align:center; padding:1.25rem 1rem; font-size:.9rem; }
+  footer a { color:var(--hdr-fg); }
+  button { font:inherit; cursor:pointer; border:0; border-radius:0; padding:.5rem .9rem; font-weight:600; }
+  .skinbar { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.4rem; justify-content:center; align-items:center; font-size:.8rem; }
+  .skinbar > span { text-transform:uppercase; letter-spacing:.08em; opacity:.8; margin-right:.25rem; }
+  .skin { display:inline-flex; align-items:center; gap:.4rem; background:transparent; color:var(--hdr-fg); border:1px solid var(--hdr-fg); padding:.3rem .65rem .3rem .45rem; font-size:.8rem; font-weight:500; }
+  .skin i { width:14px; height:14px; border-radius:50%; border:1px solid #888; background:linear-gradient(135deg,var(--sw1) 50%,var(--sw2) 50%); }
+  .skin[aria-pressed="true"] { box-shadow:inset 0 0 0 1px var(--hdr-fg); font-weight:700; }
+</style>
+<script>
+  try { var k = localStorage.getItem("capstone8000-skin"); document.documentElement.setAttribute("data-skin", /^(paper|concrete|graphite|ink)$/.test(k) ? k : "paper"); }
+  catch (e) { document.documentElement.setAttribute("data-skin", "paper"); }
+</script>
+</head>
+<body>
+<header>
+  <h1>Capstone8000</h1>
+  <p>Salvin's prototype</p>
+  <nav><a href="../../index.html">Team</a><a href="../../index.html#ideas">Project Ideas</a><a href="../../profile.html">Add Profile</a><a href="index.html" aria-current="page">Salvin's Prototype</a></nav>
+  <div class="skinbar" id="skinbar" role="group" aria-label="Theme">
+    <span>Theme</span>
+    <button class="skin" type="button" data-skin="paper" style="--sw1:#fff;--sw2:#111"><i></i>Paper</button>
+    <button class="skin" type="button" data-skin="concrete" style="--sw1:#d6d6d6;--sw2:#151515"><i></i>Concrete</button>
+    <button class="skin" type="button" data-skin="graphite" style="--sw1:#1c1c1e;--sw2:#ececec"><i></i>Graphite</button>
+    <button class="skin" type="button" data-skin="ink" style="--sw1:#000;--sw2:#fff"><i></i>Ink</button>
+  </div>
+</header>
+
+<main>
+  <div class="screens">
+    <figure>
+      <a href="Home.png" target="_blank" rel="noopener"><img src="Home.png" width="402" height="874" alt="Home screen: greeting, a 'Big ideas start with real data' banner with an Explore Data Lab button, a Python for data analysis course at 40%, and learner countries"></a>
+      <figcaption>Home</figcaption>
+    </figure>
+    <figure>
+      <a href="Data%20Lab.png" target="_blank" rel="noopener"><img src="Data%20Lab.png" width="402" height="874" alt="Data Lab screen: a daily screen time bar chart for India, Philippines and Japan, with a prompt to compare weekends" loading="lazy"></a>
+      <figcaption>Data Lab</figcaption>
+    </figure>
+    <figure>
+      <a href="My%20learning.png" target="_blank" rel="noopener"><img src="My%20learning.png" width="402" height="874" alt="My learning screen: Python for data analysis at 40% progress with a three-step learning path" loading="lazy"></a>
+      <figcaption>My learning</figcaption>
+    </figure>
+    <figure>
+      <a href="Community.png" target="_blank" rel="noopener"><img src="Community.png" width="402" height="874" alt="Community screen: 358 learners, discussion threads, and a Start a discussion button" loading="lazy"></a>
+      <figcaption>Community</figcaption>
+    </figure>
+  </div>
+</main>
+
+<footer>
+  &copy; <span id="year"></span> Capstone8000 &middot;
+  <a href="https://github.com/kisshan2202/capstone8000">View on GitHub</a>
+</footer>
+
+<script>
+  (function () {
+    var bar = document.getElementById("skinbar");
+    function mark() { var c = document.documentElement.getAttribute("data-skin");
+      bar.querySelectorAll(".skin").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.skin === c); }); }
+    bar.addEventListener("click", function (e) {
+      var b = e.target.closest(".skin"); if (!b) return;
+      document.documentElement.setAttribute("data-skin", b.dataset.skin);
+      try { localStorage.setItem("capstone8000-skin", b.dataset.skin); } catch (err) {}
+      mark();
+    });
+    mark();
+    document.getElementById("year").textContent = new Date().getFullYear();
+  })();
+</script>
+</body>
+</html>
