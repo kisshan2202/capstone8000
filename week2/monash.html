@@ -31,8 +31,11 @@
   .bar { display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding:.45rem 1rem .7rem; }
   .logo { display:flex; align-items:center; justify-content:center; min-width:136px; height:44px; border:2px dashed rgba(255,255,255,.85); border-radius:12px;
     font-size:.66rem; font-weight:800; letter-spacing:.07em; text-align:center; line-height:1.2; }
-  .logo.has-img { background:#fff; border:0; padding:3px 10px; box-shadow:0 4px 12px -6px rgba(0,0,0,.4); }
-  .logo img { display:block; height:38px; width:auto; max-width:170px; object-fit:contain; }
+  .logo.has-img { background:#fff; border:0; padding:0 12px; min-width:0; overflow:hidden; box-shadow:0 4px 12px -6px rgba(0,0,0,.4); }
+  .logo img { display:block; height:66px; width:auto; flex:0 0 auto; }  /* the PNG has white margins; the badge crops them */
+  .a-top { display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+  .skip { display:inline-flex; align-items:center; gap:.4rem; padding:.55rem .9rem; border-radius:999px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.4); color:#fff; font-weight:800; font-size:.85rem; white-space:nowrap; }
+  .skip svg { width:16px; height:16px; }
   .logo [hidden] { display:none; }
   .logo-ph { padding:0 .5rem; white-space:nowrap; }
   .bar-actions { display:flex; gap:.45rem; align-items:center; }
@@ -340,7 +343,7 @@
   <div class="view" id="view-signin" hidden>
     <div class="a-hero">
       <div class="statusbar" aria-hidden="true"><span>9:41</span><span>5G &nbsp;100%</span></div>
-      <div class="logo" data-logo></div>
+      <div class="a-top"><div class="logo" data-logo></div><button class="skip" type="button" data-demo>See App demo <svg><use href="#i-arrow"/></svg></button></div>
       <h1>Welcome back</h1>
       <p>Sign in to keep exploring with your class.</p>
     </div>
@@ -364,7 +367,7 @@
   <div class="view" id="view-signup" hidden>
     <div class="a-hero" style="padding-bottom:1.1rem">
       <div class="statusbar" aria-hidden="true"><span>9:41</span><span>5G &nbsp;100%</span></div>
-      <button class="back" type="button" id="su-back"><svg><use href="#i-back"/></svg>Back</button>
+      <div class="a-top"><button class="back" type="button" id="su-back"><svg><use href="#i-back"/></svg>Back</button><button class="skip" type="button" data-demo>See App demo <svg><use href="#i-arrow"/></svg></button></div>
       <h1 id="su-h1" style="font-size:1.3rem;margin-top:.2rem">Create your account</h1>
       <div id="su-prog">
         <div class="stepline"><span id="su-step">Step 1 of 4</span><span id="su-name">Account</span></div>
@@ -673,6 +676,9 @@
   });
 
   setScan("idle"); goStep(1);
+  $$("[data-demo]").forEach(function (b) { b.addEventListener("click", function () {
+    S = { name:"Guest", verified:false }; applyUser(); show("home"); toast("Demo mode: sample data only"); }); });
+
   var start = location.hash.slice(1);
   if (start === "home") { S.verified = true; }
   applyUser(); show(start === "home" ? "home" : start === "signup" ? "signup" : "signin");
