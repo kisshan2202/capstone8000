@@ -6,22 +6,19 @@
 <title>Monash Data App Prototype – Capstone8000</title>
 <style>
   :root {
-    --brand:#006dae; --brand-2:#0a4f7d; --brand-fg:#fff; --brand-soft:#e1f0f9;
-    --page:#dfe6ec; --bg:#f3f6f9; --card:#fff; --ink:#14202b; --muted:#5b6b78; --line:#e1e7ec;
-    --c-ke:#0b8f6a; --c-ph:#6a55d6; --c-cl:#d97706; --danger:#d63a2a; --ok:#0b8f6a;
-    --shadow:0 1px 2px rgba(16,32,48,.06), 0 10px 24px -14px rgba(16,32,48,.28);
-    --frame:#12161a; color-scheme:light;
+    --brand:#0b2540; --brand-2:#08192b; --brand-fg:#fff; --brand-soft:color-mix(in srgb, #2dd4bf 16%, transparent);
+    --accent:#2dd4bf; --on-acc:#032a27;
+    --page:#040f1b; --bg:#08192b; --card:#102c4a; --ink:#e9f6f5; --muted:#93b4bf; --line:#1f4468;
+    --c-ke:#2fc592; --c-ph:#a08cff; --c-cl:#f0a43a; --danger:#d93a40; --err:#ff8a8f; --ok:#2dd4bf;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 24px -14px rgba(0,0,0,.7);
+    --frame:#000; color-scheme:dark;
   }
-  @media (prefers-color-scheme:dark) { :root {
-    --brand:#0b5f94; --brand-2:#073a5c; --brand-soft:#12303f;
-    --page:#0a0d10; --bg:#12161a; --card:#1b2127; --ink:#e8eef2; --muted:#9aa8b3; --line:#2a333a;
-    --c-ke:#2fc592; --c-ph:#a08cff; --c-cl:#f0a43a; --danger:#ff6b5a;
-    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 24px -14px rgba(0,0,0,.7); --frame:#000; color-scheme:dark; } }
+  [hidden] { display:none !important; }
   * { box-sizing:border-box; }
   html { scroll-behavior:smooth; }
   body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--page); color:var(--ink); padding:24px 16px 40px; display:flex; justify-content:center; }
   button { font:inherit; color:inherit; cursor:pointer; border:0; background:none; padding:0; }
-  button:focus-visible, input:focus-visible { outline:3px solid var(--brand); outline-offset:2px; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
   @media (prefers-reduced-motion:reduce) { * { transition:none !important; scroll-behavior:auto !important; } }
 
   /* The phone grows with its content, so the page scrolls instead of the app being squeezed. */
@@ -41,12 +38,12 @@
   .bar-actions { display:flex; gap:.45rem; align-items:center; }
   .pill { display:inline-flex; align-items:center; gap:.35rem; white-space:nowrap; padding:.4rem .7rem; border-radius:999px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3); font-size:.8rem; font-weight:700; color:inherit; }
   .pill svg { width:16px; height:16px; }
-  .avatar { width:36px; height:36px; border-radius:50%; background:#fff; color:var(--brand); display:grid; place-items:center; font-weight:800; font-size:.85rem; }
+  .avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); color:var(--on-acc); display:grid; place-items:center; font-weight:800; font-size:.85rem; }
   .hero { background:var(--brand); background-image:radial-gradient(circle at 85% 0%, rgba(255,255,255,.18), transparent 45%), linear-gradient(180deg,var(--brand),var(--brand-2));
     color:var(--brand-fg); padding:.6rem 1.1rem 4.2rem; border-radius:0 0 32px 32px; }
   .hero h1 { margin:.1rem 0 .25rem; font-size:1.6rem; letter-spacing:-.01em; }
   .hero p { margin:0 0 1rem; opacity:.9; line-height:1.4; }
-  .cta { display:inline-flex; align-items:center; gap:.45rem; padding:.7rem 1.1rem; border-radius:14px; background:#fff; color:var(--brand-2); font-weight:800; box-shadow:0 8px 18px -8px rgba(0,0,0,.45); }
+  .cta { display:inline-flex; align-items:center; gap:.45rem; padding:.7rem 1.1rem; border-radius:14px; background:var(--accent); color:var(--on-acc); font-weight:800; box-shadow:0 8px 18px -8px rgba(0,0,0,.45); }
   .cta svg { width:18px; height:18px; }
   .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; margin:-2.6rem 1rem 0; position:relative; z-index:2; }
   .stat { background:var(--card); border-radius:16px; padding:.75rem .5rem; text-align:center; box-shadow:var(--shadow); }
@@ -57,7 +54,7 @@
   .sec-title { margin:.2rem .2rem .7rem; font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:800; }
 
   /* ---- cards ---- */
-  .card { --acc:var(--brand); background:var(--card); border-radius:20px; margin-bottom:.85rem; box-shadow:var(--shadow); overflow:hidden; scroll-margin-top:104px;
+  .card { --acc:var(--accent); background:var(--card); border-radius:20px; margin-bottom:.85rem; box-shadow:var(--shadow); overflow:hidden; scroll-margin-top:104px;
     border:1px solid var(--line); transition:box-shadow .2s; }
   .card.open { border-color:color-mix(in srgb, var(--acc) 40%, var(--line)); }
   .card-head { width:100%; display:flex; align-items:center; gap:.85rem; padding:1rem; text-align:left; min-height:72px; }
@@ -81,7 +78,7 @@
   /* ---- segmented filter ---- */
   .seg { display:flex; gap:.25rem; padding:.25rem; border-radius:14px; background:var(--bg); border:1px solid var(--line); overflow-x:auto; }
   .seg button { flex:1 0 auto; padding:.5rem .8rem; border-radius:10px; font-size:.85rem; font-weight:700; color:var(--muted); transition:background .2s,color .2s; }
-  .seg button[aria-pressed="true"] { background:var(--acc); color:#fff; box-shadow:0 4px 10px -4px color-mix(in srgb, var(--acc) 70%, transparent); }
+  .seg button[aria-pressed="true"] { background:var(--acc); color:var(--on-acc); box-shadow:0 4px 10px -4px color-mix(in srgb, var(--acc) 70%, transparent); }
   .insight { display:flex; gap:.6rem; align-items:flex-start; margin-top:.8rem; padding:.7rem .8rem; border-radius:14px; background:color-mix(in srgb, var(--acc) 10%, transparent); font-size:.88rem; line-height:1.4; }
   .insight svg { width:20px; height:20px; flex:0 0 auto; color:var(--acc); margin-top:.05rem; }
   .chart { background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:.6rem .5rem .3rem; }
@@ -100,15 +97,15 @@
   .row.me { align-self:flex-end; flex-direction:row-reverse; }
   .av { flex:0 0 30px; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; color:#fff; font-size:.72rem; font-weight:800; }
   .bubble { padding:.55rem .8rem; border-radius:18px 18px 18px 6px; background:var(--bg); border:1px solid var(--line); font-size:.92rem; line-height:1.35; }
-  .row.me .bubble { background:var(--acc); color:#fff; border-color:var(--acc); border-radius:18px 18px 6px 18px; }
+  .row.me .bubble { background:var(--acc); color:var(--on-acc); border-color:var(--acc); border-radius:18px 18px 6px 18px; }
   .bubble b { display:block; font-size:.72rem; color:var(--muted); margin-bottom:.1rem; }
-  .row.me .bubble b { color:rgba(255,255,255,.85); }
+  .row.me .bubble b { color:rgba(3,42,39,.8); }
   .bubble time { display:block; font-size:.66rem; opacity:.65; margin-top:.2rem; text-align:right; }
   .att { margin-top:.4rem; padding:.45rem .55rem; border-radius:10px; background:rgba(0,0,0,.12); font-size:.8rem; display:flex; gap:.4rem; align-items:center; font-weight:600; }
   .att svg { width:16px; height:16px; flex:0 0 auto; }
   .composer { display:flex; gap:.45rem; }
   .composer input { flex:1; min-width:0; font:inherit; padding:.7rem 1rem; border-radius:999px; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
-  .send { padding:.65rem 1.1rem; border-radius:999px; background:var(--acc); color:#fff; font-weight:800; }
+  .send { padding:.65rem 1.1rem; border-radius:999px; background:var(--acc); color:var(--on-acc); font-weight:800; }
 
   /* ---- my data ---- */
   .privacy { display:flex; gap:.7rem; align-items:center; margin-top:.7rem; padding:.75rem .85rem; border-radius:14px; background:color-mix(in srgb, var(--acc) 10%, transparent); font-size:.85rem; line-height:1.35; }
@@ -131,11 +128,79 @@
     background:color-mix(in srgb, var(--card) 92%, transparent); backdrop-filter:blur(10px); border:1px solid var(--line); border-radius:24px; box-shadow:0 14px 30px -12px rgba(0,0,0,.4); }
   .tab { display:grid; justify-items:center; gap:.1rem; padding:.45rem 0; border-radius:18px; font-size:.7rem; font-weight:700; color:var(--muted); transition:background .2s,color .2s; }
   .tab svg { width:22px; height:22px; }
-  .tab[aria-current="page"] { background:var(--brand-soft); color:var(--brand); }
-  @media (prefers-color-scheme:dark) { .tab[aria-current="page"] { color:#6cc0f0; } }
+  .tab[aria-current="page"] { background:var(--brand-soft); color:var(--accent); }
   .toast { position:fixed; left:50%; bottom:104px; transform:translate(-50%,20px); opacity:0; pointer-events:none; z-index:50; background:#12161a; color:#fff;
     padding:.6rem 1rem; border-radius:999px; font-size:.84rem; font-weight:600; transition:all .25s; white-space:nowrap; box-shadow:0 10px 24px -8px rgba(0,0,0,.5); }
   .toast.show { opacity:1; transform:translate(-50%,0); }
+
+  /* ---- views, sign in, sign up ---- */
+  .view { display:flex; flex-direction:column; flex:1; }
+  .a-hero { background:var(--brand); background-image:radial-gradient(circle at 85% 0%, rgba(255,255,255,.14), transparent 45%), linear-gradient(180deg,var(--brand),var(--brand-2)); color:var(--brand-fg); padding:0 1.2rem 1.5rem; border-radius:0 0 30px 30px; }
+  .a-hero .statusbar { margin:0 -.9rem; }
+  .a-hero h1 { margin:1.1rem 0 .25rem; font-size:1.7rem; letter-spacing:-.01em; outline:0; }
+  .a-hero p { margin:0; opacity:.9; line-height:1.4; }
+  .a-body { flex:1; padding:1.3rem 1.2rem 1.8rem; display:flex; flex-direction:column; gap:1rem; }
+  .fld label { display:block; font-size:.82rem; font-weight:700; color:var(--muted); margin-bottom:.35rem; }
+  .inp { display:flex; align-items:center; gap:.6rem; padding:0 .85rem; min-height:50px; border-radius:14px; background:var(--card); border:1px solid var(--line); color:var(--muted); }
+  .inp:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+  .inp.bad { border-color:var(--err); }
+  .inp svg { width:18px; height:18px; flex:0 0 auto; }
+  .inp input, .inp select { flex:1; min-width:0; font:inherit; background:none; border:0; color:var(--ink); padding:.75rem 0; outline:0 !important; }
+  .inp select option { background:var(--card); color:var(--ink); }
+  .eye { font-size:.8rem; font-weight:800; color:var(--accent); padding:.4rem .2rem; }
+  .err { margin:.35rem 0 0; font-size:.8rem; color:var(--err); font-weight:600; }
+  .err:empty { display:none; }
+  .hintx { margin:.3rem 0 0; font-size:.76rem; color:var(--muted); }
+  .btn { min-height:52px; border-radius:15px; width:100%; display:flex; align-items:center; justify-content:center; gap:.5rem; font-weight:800; font-size:1rem; }
+  .btn.pri { background:var(--accent); color:var(--on-acc); box-shadow:0 12px 22px -12px var(--accent); }
+  .btn.sec { background:var(--card); border:1.5px solid var(--line); color:var(--ink); font-weight:700; }
+  .btn:disabled { opacity:.6; cursor:not-allowed; }
+  .btn svg { width:18px; height:18px; }
+  .linkbtn { color:var(--accent); font-weight:700; font-size:inherit; text-decoration:underline; text-underline-offset:3px; }
+  .or { display:flex; align-items:center; gap:.8rem; font-size:.8rem; color:var(--muted); }
+  .or::before, .or::after { content:""; flex:1; height:1px; background:var(--line); }
+  .foot { text-align:center; color:var(--muted); font-size:.92rem; margin:auto 0 0; padding-top:.6rem; }
+  .privacy { margin-top:0; --acc:var(--accent); }
+  .back { display:flex; align-items:center; gap:.4rem; margin:.5rem 0 .2rem -.2rem; padding:.3rem .2rem; font-weight:800; color:inherit; font-size:1rem; }
+  .back svg { width:20px; height:20px; }
+  .stepline { display:flex; justify-content:space-between; font-size:.8rem; font-weight:700; margin:.5rem 0 .4rem; color:rgba(255,255,255,.8); }
+  .prog { height:6px; border-radius:9px; background:rgba(255,255,255,.2); overflow:hidden; }
+  .prog i { display:block; height:100%; width:25%; background:var(--accent); border-radius:9px; transition:width .3s; }
+  .meter { display:flex; gap:5px; margin-top:.5rem; } .meter i { flex:1; height:5px; border-radius:3px; background:var(--line); } .meter i.on { background:var(--accent); }
+  .step { display:flex; flex-direction:column; gap:1rem; }
+  .vf { position:relative; height:236px; border-radius:20px; background:radial-gradient(circle at 50% 40%, #25303f, #0a0e14 75%); display:grid; place-items:center; overflow:hidden; border:1px solid var(--line); }
+  .idc { width:196px; height:122px; border-radius:12px; background:linear-gradient(135deg,#f4f6fa,#d9dfe9); position:relative; box-shadow:0 8px 20px rgba(0,0,0,.5); transform:rotate(-2deg); }
+  .idc .st { position:absolute; left:0; right:0; top:0; height:25px; background:#2a58a8; border-radius:12px 12px 0 0; color:#fff; font-size:8px; font-weight:800; letter-spacing:.1em; display:flex; align-items:center; padding-left:10px; }
+  .idc .ph { position:absolute; left:10px; top:36px; width:46px; height:56px; border-radius:6px; background:#aab4c6; }
+  .idc .ln { position:absolute; left:68px; height:6px; border-radius:3px; background:#8a95a8; } .idc .ln.d { background:#38455c; }
+  .corner { position:absolute; width:28px; height:28px; border:3px solid var(--accent); }
+  .c1 { left:22px; top:26px; border-right:0; border-bottom:0; border-radius:10px 0 0 0; } .c2 { right:22px; top:26px; border-left:0; border-bottom:0; border-radius:0 10px 0 0; }
+  .c3 { left:22px; bottom:34px; border-right:0; border-top:0; border-radius:0 0 0 10px; } .c4 { right:22px; bottom:34px; border-left:0; border-top:0; border-radius:0 0 10px 0; }
+  .scanln { position:absolute; left:24px; right:24px; top:50%; height:2px; background:var(--accent); box-shadow:0 0 14px 4px color-mix(in srgb, var(--accent) 60%, transparent); opacity:.55; }
+  .vf.scanning .scanln { opacity:1; animation:scan 1.3s ease-in-out infinite; }
+  @keyframes scan { 0% { top:18%; } 50% { top:76%; } 100% { top:18%; } }
+  @media (prefers-reduced-motion:reduce) { .vf.scanning .scanln { animation:none; } }
+  .vf .hint { position:absolute; bottom:10px; left:0; right:0; text-align:center; font-size:.76rem; color:#cdd6e4; }
+  .shutter { display:flex; align-items:center; justify-content:space-around; }
+  .shutter .rt { width:68px; height:68px; border-radius:50%; border:4px solid var(--accent); display:grid; place-items:center; } .shutter .rt i { width:48px; height:48px; border-radius:50%; background:var(--accent); display:block; }
+  .shutter .side { width:84px; text-align:center; font-size:.82rem; font-weight:700; color:var(--muted); line-height:1.25; padding:.4rem 0; }
+  .okchips { display:flex; gap:.4rem; flex-wrap:wrap; }
+  .okchip { display:inline-flex; align-items:center; gap:.3rem; padding:.3rem .65rem; border-radius:999px; font-size:.78rem; font-weight:800; background:color-mix(in srgb, var(--ok) 16%, transparent); color:var(--ok); }
+  .okchip svg { width:14px; height:14px; }
+  .facts { display:grid; gap:.1rem; padding:.2rem .9rem; border-radius:14px; background:var(--card); border:1px solid var(--line); }
+  .facts > div { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.7rem 0; border-bottom:1px solid var(--line); font-size:.92rem; }
+  .facts > div:last-child { border-bottom:0; } .facts span { color:var(--muted); }
+  .facts input[aria-invalid="true"] { border-bottom:2px solid var(--err); }
+  .facts input { width:130px; text-align:right; font:inherit; font-weight:700; color:var(--ink); background:none; border:0; border-bottom:1px dashed var(--muted); padding:.2rem 0; }
+  .chk { display:flex; gap:.75rem; align-items:flex-start; font-size:.92rem; line-height:1.4; }
+  .chk input { width:22px; height:22px; accent-color:var(--accent); flex:0 0 auto; margin:0; }
+  .done { align-items:center; text-align:center; padding-top:1.2rem; }
+  .tick { width:100px; height:100px; border-radius:50%; background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--accent); display:grid; place-items:center; }
+  .tick svg { width:54px; height:54px; }
+  .done h2 { margin:.4rem 0 0; font-size:1.5rem; } .done p { margin:0; color:var(--muted); line-height:1.45; }
+  .vbadge { display:inline-flex; align-items:center; gap:.35rem; margin:.1rem 0 .7rem; padding:.3rem .7rem; border-radius:99px; font-size:.78rem; font-weight:800; background:color-mix(in srgb, var(--ok) 22%, transparent); color:var(--ok); }
+  .vbadge svg { width:14px; height:14px; }
+  .signout { margin-top:1rem; width:100%; min-height:48px; border-radius:14px; border:1.5px solid var(--line); font-weight:700; color:var(--ink); }
 
   @media (max-width:480px) {
     body { padding:0; display:block; }
@@ -161,27 +226,30 @@
     <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
     <symbol id="i-motion" viewBox="0 0 24 24"><path d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
     <symbol id="i-mount" viewBox="0 0 24 24"><path d="M2 19l7-12 4 6 3-4 6 10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </defs>
 </svg>
 
 <div class="phone" id="phone">
+  <div class="view" id="view-home" hidden>
   <div class="topbar">
     <div class="statusbar" aria-hidden="true"><span>9:41</span><span>5G &nbsp;100%</span></div>
     <div class="bar">
-      <div class="logo" id="logo">
-        <img src="monash-logo.png" alt="Monash University" height="38" id="logo-img" hidden>
-        <span class="logo-ph" id="logo-ph" role="img" aria-label="Placeholder for the Monash logo">MONASH LOGO<br>PLACEHOLDER</span>
-      </div>
+      <div class="logo" data-logo></div>
       <div class="bar-actions">
         <button class="pill" id="chip-privacy" type="button" aria-label="Privacy: open My data"><svg><use href="#i-lock"/></svg><span id="chip-count">5 on</span></button>
-        <span class="avatar" aria-hidden="true">ST</span>
+        <span class="avatar" id="avatar" aria-hidden="true">ST</span>
       </div>
     </div>
   </div>
 
   <div class="hero">
-    <h1>Hi, student</h1>
+    <h1 id="hi">Hi, student</h1>
+    <span class="vbadge" id="vbadge" hidden><svg><use href="#i-check"/></svg> Verified student</span>
     <p>Explore your data and learn together with students in Kenya, the Philippines and Chile.</p>
     <button class="cta" type="button" data-go="card-dash">Start exploring <svg><use href="#i-arrow"/></svg></button>
   </div>
@@ -195,7 +263,7 @@
     <h2 class="sec-title">Your space</h2>
 
     <!-- Dashboard -->
-    <section class="card" id="card-dash" style="--acc:var(--brand)">
+    <section class="card" id="card-dash" style="--acc:var(--accent)">
       <button class="card-head" type="button" aria-expanded="false" aria-controls="p-dash">
         <span class="card-ico"><svg><use href="#i-chart"/></svg></span>
         <span class="card-txt"><strong>Dashboard</strong><span>3 countries · sample data</span></span>
@@ -222,7 +290,7 @@
     </section>
 
     <!-- Chat -->
-    <section class="card" id="card-chat" style="--acc:#6a55d6">
+    <section class="card" id="card-chat" style="--acc:#a08cff">
       <button class="card-head" type="button" aria-expanded="false" aria-controls="p-chat">
         <span class="card-ico"><svg><use href="#i-chat"/></svg></span>
         <span class="card-txt"><strong>Chat</strong><span id="chat-prev">2 new messages</span></span>
@@ -246,7 +314,7 @@
     </section>
 
     <!-- My data -->
-    <section class="card" id="card-data" style="--acc:#0b8f6a">
+    <section class="card" id="card-data" style="--acc:var(--ok)">
       <button class="card-head" type="button" aria-expanded="false" aria-controls="p-data">
         <span class="card-ico"><svg><use href="#i-shield"/></svg></span>
         <span class="card-txt"><strong>My data</strong><span id="data-prev">5 of 5 sensors on</span></span>
@@ -255,6 +323,7 @@
       <div class="panel" id="p-data"><div><div class="panel-in">
         <div class="privacy"><svg><use href="#i-shield"/></svg><span>You choose what to share. Your data is anonymised before classmates can see it.</span></div>
         <div id="sensors"></div>
+        <button class="signout" id="signout" type="button">Sign out</button>
       </div></div></div>
     </section>
   </main>
@@ -265,6 +334,108 @@
     <button class="tab" type="button" data-go="card-chat"><svg><use href="#i-chat"/></svg>Chat</button>
     <button class="tab" type="button" data-go="card-data"><svg><use href="#i-gear"/></svg>Settings</button>
   </nav>
+  </div>
+
+  <!-- ===== Sign in ===== -->
+  <div class="view" id="view-signin" hidden>
+    <div class="a-hero">
+      <div class="statusbar" aria-hidden="true"><span>9:41</span><span>5G &nbsp;100%</span></div>
+      <div class="logo" data-logo></div>
+      <h1>Welcome back</h1>
+      <p>Sign in to keep exploring with your class.</p>
+    </div>
+    <form class="a-body" id="f-signin" novalidate>
+      <div class="fld"><label for="si-user">Student email or ID</label>
+        <div class="inp"><svg><use href="#i-mail"/></svg><input id="si-user" autocomplete="username" placeholder="you@student.edu" maxlength="120"></div>
+        <p class="err" id="si-user-e" role="alert"></p></div>
+      <div class="fld"><label for="si-pw">Password</label>
+        <div class="inp"><svg><use href="#i-lock"/></svg><input id="si-pw" type="password" autocomplete="current-password" placeholder="Your password" maxlength="100"><button class="eye" type="button" data-eye="si-pw" aria-label="Show password">Show</button></div>
+        <p class="err" id="si-pw-e" role="alert"></p></div>
+      <div style="text-align:right;margin-top:-.3rem"><button class="linkbtn" type="button" id="forgot" style="font-size:.88rem">Forgot password?</button></div>
+      <button class="btn pri" type="submit">Sign in</button>
+      <div class="or">or</div>
+      <button class="btn sec" type="button" id="sso"><svg><use href="#i-user"/></svg>Continue with university login</button>
+      <div class="privacy"><svg><use href="#i-shield"/></svg><span>For verified students only. Your data stays protected.</span></div>
+      <p class="foot">New here? <button class="linkbtn" type="button" id="to-signup">Create account</button></p>
+    </form>
+  </div>
+
+  <!-- ===== Sign up (4 steps + success) ===== -->
+  <div class="view" id="view-signup" hidden>
+    <div class="a-hero" style="padding-bottom:1.1rem">
+      <div class="statusbar" aria-hidden="true"><span>9:41</span><span>5G &nbsp;100%</span></div>
+      <button class="back" type="button" id="su-back"><svg><use href="#i-back"/></svg>Back</button>
+      <h1 id="su-h1" style="font-size:1.3rem;margin-top:.2rem">Create your account</h1>
+      <div id="su-prog">
+        <div class="stepline"><span id="su-step">Step 1 of 4</span><span id="su-name">Account</span></div>
+        <div class="prog"><i id="su-bar"></i></div>
+      </div>
+    </div>
+    <div class="a-body">
+      <form class="step" id="su1" novalidate>
+        <div class="fld"><label for="su-first">First name</label><div class="inp"><input id="su-first" autocomplete="given-name" maxlength="60"></div><p class="err" id="su-first-e" role="alert"></p></div>
+        <div class="fld"><label for="su-last">Last name</label><div class="inp"><input id="su-last" autocomplete="family-name" maxlength="60"></div><p class="err" id="su-last-e" role="alert"></p></div>
+        <div class="fld"><label for="su-email">University email</label><div class="inp"><svg><use href="#i-mail"/></svg><input id="su-email" type="email" autocomplete="email" placeholder="you@student.edu" maxlength="120"></div><p class="err" id="su-email-e" role="alert"></p></div>
+        <div class="fld"><label for="su-pw">Password</label>
+          <div class="inp"><svg><use href="#i-lock"/></svg><input id="su-pw" type="password" autocomplete="new-password" maxlength="100"><button class="eye" type="button" data-eye="su-pw" aria-label="Show password">Show</button></div>
+          <div class="meter" aria-hidden="true"><i></i><i></i><i></i></div><p class="hintx" id="su-pw-h">At least 8 characters.</p><p class="err" id="su-pw-e" role="alert"></p></div>
+        <div class="fld"><label for="su-pw2">Confirm password</label><div class="inp"><svg><use href="#i-lock"/></svg><input id="su-pw2" type="password" autocomplete="new-password" maxlength="100"></div><p class="err" id="su-pw2-e" role="alert"></p></div>
+        <button class="btn pri" type="submit">Next</button>
+      </form>
+
+      <form class="step" id="su2" hidden novalidate>
+        <div class="fld"><label for="su-country">Country of study</label>
+          <div class="inp"><select id="su-country"><option value="">Select your country</option><option>Kenya</option><option>Philippines</option><option>Chile</option><option>Australia</option><option>Other</option></select></div>
+          <p class="err" id="su-country-e" role="alert"></p></div>
+        <div class="fld"><label for="su-pref">Preferred name (optional)</label><div class="inp"><svg><use href="#i-user"/></svg><input id="su-pref" autocomplete="nickname" maxlength="60" placeholder="What should classmates call you?"></div></div>
+        <button class="btn pri" type="submit">Next</button>
+      </form>
+
+      <div class="step" id="su3" hidden>
+        <div class="vf" id="vf">
+          <div class="idc"><div class="st">UNIVERSITY ID</div><div class="ph"></div><div class="ln d" style="top:38px;width:92px"></div><div class="ln" style="top:54px;width:64px"></div><div class="ln d" style="top:74px;width:80px"></div><div class="ln" style="top:90px;width:54px"></div></div>
+          <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i><i class="scanln"></i>
+          <div class="hint" id="vf-hint">Fit your card in the frame. Avoid glare.</div>
+        </div>
+        <p class="hintx" id="scan-live" role="status" style="margin:-.4rem 0 0"></p>
+        <div class="shutter" id="scan-actions">
+          <button class="side" type="button" id="sc-upload">Upload photo</button>
+          <button class="rt" type="button" id="sc-go" aria-label="Scan ID"><i></i></button>
+          <button class="side" type="button" id="sc-manual">Enter ID manually</button>
+        </div>
+        <input type="file" id="id-file" accept="image/*" hidden>
+        <div id="scan-res" hidden>
+          <div class="okchips" id="sc-chips" style="margin-bottom:.8rem"><span class="okchip"><svg><use href="#i-check"/></svg>Name</span><span class="okchip"><svg><use href="#i-check"/></svg>Student ID</span><span class="okchip"><svg><use href="#i-check"/></svg>Expiry</span></div>
+          <div class="facts">
+            <div id="sc-name-row"><span>Name</span><b id="sc-name"></b></div>
+            <div><span><label for="sc-id" style="display:inline;margin:0;font-size:inherit;font-weight:inherit;color:inherit">Student ID</label></span><input id="sc-id" inputmode="text" maxlength="12" autocomplete="off"></div>
+            <div id="sc-exp-row"><span>Expiry</span><b>12/2027</b></div>
+          </div>
+          <p class="err" id="sc-id-e" role="alert"></p>
+          <p class="hintx" id="scan-file"></p>
+          <button class="btn pri" type="button" id="sc-ok" style="margin-top:.9rem">Looks right</button>
+          <p style="text-align:center;margin:.8rem 0 0"><button class="linkbtn" type="button" id="sc-again" style="font-size:.9rem">Scan again</button></p>
+        </div>
+        <div class="privacy"><svg><use href="#i-lock"/></svg><span>Prototype: nothing is read or uploaded. In the real app your photo would be read on your phone and deleted after checking.</span></div>
+      </div>
+
+      <form class="step" id="su4" hidden novalidate>
+        <div class="privacy"><svg><use href="#i-shield"/></svg><span>You decide what to share. Data is anonymised before classmates can see it, and you can switch each item off later in My data.</span></div>
+        <label class="chk" for="ck-share"><input type="checkbox" id="ck-share"><span>I agree to share my phone data (location, provider, IP, accelerometer, altitude) with my class, anonymised.</span></label>
+        <label class="chk" for="ck-terms"><input type="checkbox" id="ck-terms"><span>I confirm my student details are correct and accept the terms of use.</span></label>
+        <p class="err" id="ck-e" role="alert"></p>
+        <button class="btn pri" type="submit">Create account</button>
+      </form>
+
+      <div class="step done" id="su5" hidden>
+        <span class="tick"><svg><use href="#i-check"/></svg></span>
+        <h2 tabindex="-1" id="su5-h">You're verified</h2>
+        <p>Welcome, <b id="done-name"></b>. Your student ID check passed.</p>
+        <button class="btn pri" type="button" id="to-home">Go to Home</button>
+        <div class="privacy" style="text-align:left"><svg><use href="#i-shield"/></svg><span>Prototype: no account was created and nothing was saved.</span></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -275,9 +446,11 @@
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
 
   /* ---------- logo: shows monash-logo.png when present, otherwise the placeholder ---------- */
-  var li = $("#logo-img"), probe = new Image();
-  probe.onload = function () { li.hidden = false; $("#logo-ph").hidden = true; $("#logo").classList.add("has-img"); };
-  probe.src = li.getAttribute("src");
+  var logoOk = false;
+  function paintLogos() { $$("[data-logo]").forEach(function (el) {
+    el.innerHTML = logoOk ? '<img src="monash-logo.png" alt="Monash University" height="38">' : '<span class="logo-ph" role="img" aria-label="Placeholder for the Monash logo">MONASH LOGO<br>PLACEHOLDER</span>';
+    el.classList.toggle("has-img", logoOk); }); }
+  var probe = new Image(); probe.onload = function () { logoOk = true; paintLogos(); }; probe.src = "monash-logo.png"; paintLogos();
 
   /* ---------- cards: all hidden by default, each opens independently ---------- */
   function setOpen(card, open) {
@@ -384,6 +557,125 @@
     $$(".switch", $("#sensors")).forEach(function (b) { b.addEventListener("click", function () { var i = +b.dataset.i; on[i] = !on[i]; drawSensors(); $$(".switch", $("#sensors"))[i].focus(); }); });
   }
   drawSensors();
+
+  /* ---------- sign in / sign up (prototype only: nothing is stored or sent) ---------- */
+  var S = { name:"Student", verified:false };
+  var TITLES = ["Account", "About you", "Scan ID", "Consent"], step = 1, scan = "idle", scanT;
+  function cap(w) { return w ? w.charAt(0).toUpperCase() + w.slice(1) : w; }
+  function show(v) {
+    ["home", "signin", "signup"].forEach(function (n) { document.getElementById("view-" + n).hidden = n !== v; });
+    window.scrollTo(0, 0);
+    var h = $("#view-" + v + " h1"); if (h) { h.tabIndex = -1; h.focus({ preventScroll:true }); }
+  }
+  function applyUser() {
+    $("#hi").textContent = "Hi, " + S.name;
+    $("#avatar").textContent = S.name.split(/\s+/).map(function (w) { return w.charAt(0); }).join("").slice(0, 2).toUpperCase();
+    $("#vbadge").hidden = !S.verified;
+  }
+  function err(id, msg) {
+    var e = $("#" + id + "-e"), i = $("#" + id); e.textContent = msg || "";
+    var w = i.closest(".inp"); if (w) w.classList.toggle("bad", !!msg);
+    i.setAttribute("aria-invalid", msg ? "true" : "false"); return !msg;
+  }
+  function firstBad(form) { var b = $(".inp.bad input, .inp.bad select", form); if (b) b.focus(); }
+
+  $$("[data-eye]").forEach(function (b) { b.addEventListener("click", function () {
+    var i = document.getElementById(b.dataset.eye), t = i.type === "password";
+    i.type = t ? "text" : "password"; b.textContent = t ? "Hide" : "Show"; b.setAttribute("aria-label", (t ? "Hide" : "Show") + " password"); }); });
+
+  $("#f-signin").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var u = $("#si-user").value.trim(), p = $("#si-pw").value;
+    var a = err("si-user", u ? "" : "Enter your student email or ID."), b = err("si-pw", p ? "" : "Enter your password.");
+    if (!(a && b)) { firstBad(this); return; }
+    S.name = u.indexOf("@") > 0 ? cap(u.split("@")[0].split(/[._-]/)[0]) : "Student"; S.verified = true;
+    applyUser(); show("home"); toast("Signed in (prototype)");
+  });
+  $("#forgot").addEventListener("click", function () { toast("Prototype: no email is sent"); });
+  $("#sso").addEventListener("click", function () { toast("Prototype: university login isn't connected yet"); });
+  $("#to-signup").addEventListener("click", function () { goStep(1); show("signup"); });
+
+  function goStep(n) {
+    step = n;
+    for (var i = 1; i <= 5; i++) $("#su" + i).hidden = i !== n;
+    var done = n === 5, k = Math.min(n, 4);
+    $("#su-prog").hidden = done; $("#su-back").hidden = done; $("#su-h1").textContent = done ? "All set" : "Create your account";
+    $("#su-step").textContent = "Step " + k + " of 4"; $("#su-name").textContent = TITLES[k - 1]; $("#su-bar").style.width = (k * 25) + "%";
+    var f = $("#su" + n + " input:not([type=hidden]):not([type=file]), #su" + n + " select");
+    if (n === 5) $("#su5-h").focus(); else if (f && n !== 3) f.focus({ preventScroll:true });
+    window.scrollTo(0, 0);
+  }
+  $("#su-back").addEventListener("click", function () { if (step === 1) show("signin"); else goStep(step - 1); });
+
+  $("#su-pw").addEventListener("input", function () {
+    var v = this.value, sc = (v.length >= 8 ? 1 : 0) + (/[A-Za-z]/.test(v) && /\d/.test(v) ? 1 : 0) + (v.length >= 12 || /[^A-Za-z0-9]/.test(v) ? 1 : 0);
+    $$(".meter i", this.closest(".fld")).forEach(function (m, i) { m.classList.toggle("on", i < sc); });
+    $("#su-pw-h").textContent = v ? ["Too short: use at least 8 characters.", "Okay. Add a number to strengthen it.", "Good.", "Strong."][sc] : "At least 8 characters.";
+  });
+  $("#su1").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var v = function (id) { return $("#" + id).value.trim(); };
+    var r = [err("su-first", v("su-first") ? "" : "Enter your first name."), err("su-last", v("su-last") ? "" : "Enter your last name."),
+      err("su-email", /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("su-email")) ? "" : "Enter a valid email address."),
+      err("su-pw", $("#su-pw").value.length >= 8 ? "" : "Use at least 8 characters."),
+      err("su-pw2", $("#su-pw2").value && $("#su-pw2").value === $("#su-pw").value ? "" : "Passwords don't match.")];
+    if (r.every(Boolean)) goStep(2); else firstBad(this);
+  });
+  $("#su2").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (err("su-country", $("#su-country").value ? "" : "Choose your country.")) goStep(3); else firstBad(this);
+  });
+
+  function setScan(st) {
+    scan = st; clearTimeout(scanT);
+    $("#vf").classList.toggle("scanning", st === "scanning");
+    $("#scan-actions").hidden = st !== "idle";
+    $("#scan-res").hidden = !(st === "done" || st === "manual");
+    $("#sc-chips").hidden = st !== "done"; $("#sc-exp-row").hidden = st !== "done"; $("#sc-name-row").hidden = st !== "done";
+    $("#scan-live").textContent = st === "scanning" ? "Scanning… hold steady." : st === "done" ? "Scan complete. Check the details below." : "";
+    $("#vf-hint").textContent = st === "scanning" ? "Scanning…" : st === "done" ? "Scan complete" : "Fit your card in the frame. Avoid glare.";
+    if (st === "idle") { $("#scan-file").textContent = ""; err("sc-id", ""); }
+  }
+  function startScan() {
+    setScan("scanning");
+    scanT = setTimeout(function () {
+      $("#sc-id").value = "20481357"; $("#sc-name").textContent = $("#su-first").value.trim() + " " + $("#su-last").value.trim(); setScan("done");
+    }, 1700);
+  }
+  $("#sc-go").addEventListener("click", startScan);
+  $("#sc-upload").addEventListener("click", function () { $("#id-file").click(); });
+  $("#id-file").addEventListener("change", function () {
+    if (this.files.length) { startScan(); $("#scan-file").textContent = "Photo selected: " + this.files[0].name + " (not uploaded)"; }
+  });
+  $("#sc-manual").addEventListener("click", function () { setScan("manual"); $("#sc-id").value = ""; $("#sc-id").focus(); });
+  $("#sc-again").addEventListener("click", function () { $("#id-file").value = ""; setScan("idle"); });
+  $("#sc-ok").addEventListener("click", function () {
+    if (err("sc-id", /^[A-Za-z0-9]{6,12}$/.test($("#sc-id").value.trim()) ? "" : "Enter 6 to 12 letters or numbers.")) goStep(4); else $("#sc-id").focus();
+  });
+  $("#sc-id").addEventListener("input", function () { err("sc-id", ""); });
+
+  $("#su4").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var ok = $("#ck-share").checked && $("#ck-terms").checked;
+    $("#ck-e").textContent = ok ? "" : "Please tick both boxes to continue.";
+    if (!ok) return;
+    S.name = $("#su-pref").value.trim() || $("#su-first").value.trim(); S.verified = true;
+    $("#done-name").textContent = S.name; goStep(5);
+  });
+  $("#to-home").addEventListener("click", function () { applyUser(); show("home"); });
+
+  $("#signout").addEventListener("click", function () {
+    S = { name:"Student", verified:false };
+    $$("#view-signin form, #view-signup form").forEach(function (f) { f.reset(); });
+    $$(".err").forEach(function (x) { x.textContent = ""; }); $$(".inp.bad").forEach(function (x) { x.classList.remove("bad"); });
+    $$(".meter i").forEach(function (m) { m.classList.remove("on"); });
+    setScan("idle"); goStep(1); applyUser(); show("signin"); toast("Signed out");
+  });
+
+  setScan("idle"); goStep(1);
+  var start = location.hash.slice(1);
+  if (start === "home") { S.verified = true; }
+  applyUser(); show(start === "home" ? "home" : start === "signup" ? "signup" : "signin");
 })();
 </script>
 </body>
