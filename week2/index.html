@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 2 – Data Science App Concept – Capstone8000</title>
+<style>
+  :root, html[data-skin="paper"] { --bg:#fff; --surface:#fff; --ink:#000; --muted:#555; --rule:#000; --soft:#ddd;
+    --accent:#000; --accent-fg:#fff; --hdr-bg:#000; --hdr-fg:#fff;
+    --fn:#0b7a55; --fn-bg:#d6f0e6; --nf:#5b49c9; --nf-bg:#e4e0fa; --risk:#b45309; --risk-bg:#fde8c8; --grey-bg:#e6e6e6; color-scheme:light; }
+  html[data-skin="concrete"] { --bg:#d6d6d6; --surface:#eee; --ink:#151515; --muted:#4a4a4a; --rule:#151515; --soft:#bbb;
+    --accent:#151515; --accent-fg:#eee; --hdr-bg:#151515; --hdr-fg:#eee;
+    --fn:#0a6b4a; --fn-bg:#c5e4d8; --nf:#4f3fb8; --nf-bg:#d5d0f0; --risk:#9a4a06; --risk-bg:#f1d9b6; --grey-bg:#cfcfcf; color-scheme:light; }
+  html[data-skin="graphite"] { --bg:#1c1c1e; --surface:#26262a; --ink:#ececec; --muted:#a3a3a8; --rule:#8a8a90; --soft:#3a3a3e;
+    --accent:#ececec; --accent-fg:#1c1c1e; --hdr-bg:#0e0e10; --hdr-fg:#ececec;
+    --fn:#2fc592; --fn-bg:#0d4a39; --nf:#9d8cf5; --nf-bg:#2e2866; --risk:#f0a43a; --risk-bg:#5a3508; --grey-bg:#45454a; color-scheme:dark; }
+  html[data-skin="ink"] { --bg:#000; --surface:#0b0b0b; --ink:#fff; --muted:#9a9a9a; --rule:#bdbdbd; --soft:#262626;
+    --accent:#fff; --accent-fg:#000; --hdr-bg:#000; --hdr-fg:#fff;
+    --fn:#2fc592; --fn-bg:#0d4a39; --nf:#9d8cf5; --nf-bg:#2e2866; --risk:#f0a43a; --risk-bg:#5a3508; --grey-bg:#3a3a3e; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; display:flex; flex-direction:column; }
+  header { background:var(--hdr-bg); color:var(--hdr-fg); padding:2.25rem 1rem 1.25rem; text-align:center; border-bottom:2px solid var(--rule); }
+  header h1 { margin:0 0 .4rem; font-size:2rem; }
+  header p { margin:0; opacity:.9; }
+  nav { margin-top:1rem; }
+  nav a { color:var(--hdr-fg); text-decoration:none; margin:0 .75rem; font-weight:600; border-bottom:2px solid transparent; }
+  nav a:hover, nav a[aria-current] { border-color:var(--hdr-fg); }
+  main { flex:1; width:100%; max-width:1100px; margin:0 auto; padding:1.5rem 1rem 3rem; }
+  h2.section { margin:2rem 0 .4rem; font-size:1.4rem; }
+  .lead { margin:0 0 1.25rem; color:var(--muted); }
+  footer { background:var(--hdr-bg); color:var(--hdr-fg); border-top:2px solid var(--rule); text-align:center; padding:1.25rem 1rem; font-size:.9rem; }
+  footer a { color:var(--hdr-fg); }
+  button { font:inherit; cursor:pointer; border:0; border-radius:0; padding:.5rem .9rem; font-weight:600; }
+  .skinbar { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.4rem; justify-content:center; align-items:center; font-size:.8rem; }
+  .skinbar > span { text-transform:uppercase; letter-spacing:.08em; opacity:.8; margin-right:.25rem; }
+  .skin { display:inline-flex; align-items:center; gap:.4rem; background:transparent; color:var(--hdr-fg); border:1px solid var(--hdr-fg); padding:.3rem .65rem .3rem .45rem; font-size:.8rem; font-weight:500; }
+  .skin i { width:14px; height:14px; border-radius:50%; border:1px solid #888; background:linear-gradient(135deg,var(--sw1) 50%,var(--sw2) 50%); }
+  .skin[aria-pressed="true"] { box-shadow:inset 0 0 0 1px var(--hdr-fg); font-weight:700; }
+
+  /* ---------- Chart 1: before / after flow ---------- */
+  .compare { display:grid; grid-template-columns:1fr 44px 1fr; gap:0; align-items:start; }
+  .panel { border:2px dashed var(--rule); padding:1rem; background:var(--surface); }
+  .panel.after { border-color:var(--fn); }
+  .panel > h3 { margin:0 0 1rem; text-align:center; font-size:1.1rem; color:var(--muted); }
+  .panel.after > h3 { color:var(--fn); }
+  .step { display:flex; gap:1rem; align-items:center; border:2px solid var(--rule); background:var(--bg); padding:.8rem 1rem; }
+  .step.risk { border-style:dashed; }
+  .step h4 { margin:0; font-size:1.05rem; }
+  .step p { margin:.15rem 0 0; color:var(--muted); font-size:.95rem; }
+  .ico { flex:0 0 52px; width:52px; height:52px; border-radius:50%; display:grid; place-items:center; background:var(--grey-bg); color:var(--ink); }
+  .after .ico { background:var(--fn-bg); color:var(--fn); }
+  .ico.risk { background:var(--risk-bg); color:var(--risk); }
+  .ico svg { width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .arrow { height:24px; position:relative; }
+  .arrow::after { content:""; position:absolute; left:50%; top:5px; width:10px; height:10px; border-right:2px solid var(--muted); border-bottom:2px solid var(--muted); transform:translateX(-50%) rotate(45deg); }
+  .arrow.dotted::after { opacity:.5; }
+  .tags { margin-top:.5rem; display:flex; flex-wrap:wrap; gap:.3rem; }
+  .tag { display:inline-block; border:1px solid var(--rule); border-radius:999px; padding:.1rem .6rem; font-size:.85rem; }
+  .mid { align-self:center; text-align:center; font-size:1.6rem; color:var(--muted); font-weight:700; }
+  @media (max-width:800px) {
+    .compare { grid-template-columns:1fr; gap:1rem; }
+    .mid { transform:rotate(90deg); }
+  }
+
+  /* ---------- Chart 2: system diagram ---------- */
+  figure { margin:0; border:2px solid var(--rule); background:var(--surface); padding:1rem; }
+  figure svg { display:block; width:100%; height:auto; max-width:1000px; margin:0 auto; }
+  .d-text { fill:var(--ink); font:500 20px system-ui,-apple-system,"Segoe UI",sans-serif; text-anchor:middle; }
+  .d-body { fill:var(--grey-bg); stroke:var(--muted); stroke-width:2; }
+  .d-screen { fill:var(--fn-bg); stroke:var(--fn); stroke-width:2; }
+  .d-line { fill:none; stroke:var(--fn); stroke-width:3; stroke-dasharray:7 6; }
+  .d-arrow { fill:none; stroke:var(--muted); stroke-width:2.5; }
+  .d-arrowhead { fill:var(--muted); }
+  .d-fn { fill:var(--fn-bg); stroke:var(--fn); stroke-width:2; }
+  .d-fn-solid { fill:var(--fn); }
+  .d-nf { fill:var(--nf-bg); stroke:var(--nf); stroke-width:2; }
+  .d-risk { fill:var(--risk-bg); stroke:var(--risk); stroke-width:2; }
+  .badge-t { font:700 24px system-ui,sans-serif; text-anchor:middle; dominant-baseline:central; }
+  .b-fn { fill:var(--fn); } .b-nf { fill:var(--nf); } .b-risk { fill:var(--risk); }
+  .wifi { fill:none; stroke:var(--fn); stroke-width:3; stroke-linecap:round; }
+  .legend { columns:2 280px; column-gap:2rem; margin:1rem 0 0; padding:1rem 0 0; border-top:1px solid var(--soft); list-style:none; }
+  .legend li { break-inside:avoid; margin-bottom:.6rem; display:flex; align-items:center; gap:.7rem; font-size:1.05rem; }
+  .num { flex:0 0 34px; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:.95rem; border:2px solid; }
+  .num.fn { background:var(--fn-bg); border-color:var(--fn); color:var(--fn); }
+  .num.nf { background:var(--nf-bg); border-color:var(--nf); color:var(--nf); }
+  .num.risk { background:var(--risk-bg); border-color:var(--risk); color:var(--risk); }
+  .key { display:flex; flex-wrap:wrap; gap:.4rem 1.5rem; margin-top:1rem; font-size:.95rem; color:var(--muted); }
+  .key span::before { content:""; display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:.4rem; vertical-align:-1px; border:2px solid; }
+  .key .k-fn::before { background:var(--fn-bg); border-color:var(--fn); }
+  .key .k-nf::before { background:var(--nf-bg); border-color:var(--nf); }
+  .key .k-risk::before { background:var(--risk-bg); border-color:var(--risk); }
+</style>
+<script>
+  try { var k = localStorage.getItem("capstone8000-skin"); document.documentElement.setAttribute("data-skin", /^(paper|concrete|graphite|ink)$/.test(k) ? k : "paper"); }
+  catch (e) { document.documentElement.setAttribute("data-skin", "paper"); }
+</script>
+</head>
+<body>
+<header>
+  <h1>Capstone8000</h1>
+  <p>Week 2 &ndash; Data science app concept</p>
+  <nav><a href="../index.html">Team</a><a href="../index.html#ideas">Project Ideas</a><a href="../profile.html">Add Profile</a></nav>
+  <div class="skinbar" id="skinbar" role="group" aria-label="Theme">
+    <span>Theme</span>
+    <button class="skin" type="button" data-skin="paper" style="--sw1:#fff;--sw2:#111"><i></i>Paper</button>
+    <button class="skin" type="button" data-skin="concrete" style="--sw1:#d6d6d6;--sw2:#151515"><i></i>Concrete</button>
+    <button class="skin" type="button" data-skin="graphite" style="--sw1:#1c1c1e;--sw2:#ececec"><i></i>Graphite</button>
+    <button class="skin" type="button" data-skin="ink" style="--sw1:#000;--sw2:#fff"><i></i>Ink</button>
+  </div>
+</header>
+
+<main>
+  <h2 class="section">From isolated study to connected learners</h2>
+  <p class="lead">How the data science app changes the online study experience for students in Kenya, the Philippines and Chile.</p>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></symbol>
+    <symbol id="i-unlink" viewBox="0 0 24 24"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><path d="M9.5 12h1M13.5 12h1"/></symbol>
+    <symbol id="i-focus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M4 4l16 16"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6c2.5-1.5 5.5-1.5 8-.5V19c-2.5-1-5.5-1-8 .5-2.5-1.5-5.5-1.5-8-.5z"/><path d="M12 6v13.5"/></symbol>
+    <symbol id="i-user-off" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/><path d="M4 4l16 16"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/></symbol>
+    <symbol id="i-sensor" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="6" rx="1.5"/><rect x="3.5" y="14" width="17" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="6" y="11" width="3" height="9"/><rect x="11" y="6" width="3" height="14"/><rect x="16" y="13" width="3" height="7"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="8" cy="8.5" r="3"/><circle cx="17" cy="9.5" r="2.5"/><path d="M2.5 19c0-3.2 2.5-5 5.5-5s5.5 1.8 5.5 5M15 14.2c.7-.2 1.3-.2 2-.2 2.4 0 4.5 1.4 4.5 4.5"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.2h.01"/></symbol>
+  </svg>
+
+  <div class="compare">
+    <section class="panel before" aria-labelledby="h-before">
+      <h3 id="h-before">Current online study</h3>
+      <div class="step"><span class="ico"><svg><use href="#i-laptop"/></svg></span><div><h4>Students study online</h4><p>Kenya, Philippines, Chile</p></div></div>
+      <div class="arrow"></div>
+      <div class="step"><span class="ico"><svg><use href="#i-unlink"/></svg></span><div><h4>No peer connection</h4><p>Strangers to each other</p></div></div>
+      <div class="arrow"></div>
+      <div class="step"><span class="ico"><svg><use href="#i-focus"/></svg></span><div><h4>Hard to stay focused</h4><p>Disconnected experience</p></div></div>
+      <div class="arrow"></div>
+      <div class="step"><span class="ico"><svg><use href="#i-book"/></svg></span><div><h4>Passive learning</h4><p>Little hands-on data work</p></div></div>
+      <div class="arrow"></div>
+      <div class="step"><span class="ico"><svg><use href="#i-user-off"/></svg></span><div><h4>Disengaged students</h4><p>Struggle to finish material</p></div></div>
+    </section>
+
+    <div class="mid" aria-hidden="true">&rarr;</div>
+
+    <section class="panel after" aria-labelledby="h-after">
+      <h3 id="h-after">With the data science app</h3>
+      <div class="step"><span class="ico"><svg><use href="#i-phone"/></svg></span><div><h4>App on student phones</h4><p>Monash data science app</p></div></div>
+      <div class="arrow"></div>
+      <div class="step"><span class="ico"><svg><use href="#i-sensor"/></svg></span><div><h4>Phone data collected</h4>
+        <div class="tags"><span class="tag">Location</span><span class="tag">Provider</span><span class="tag">IP</span><span class="tag">Accelerometer</span><span class="tag">Altitude</span></div></div></div>
+      <div class="arrow"></div>
+      <div class="step"><span class="ico"><svg><use href="#i-server"/></svg></span><div><h4>Sent to central server</h4><p>One shared database</p></div></div>
+      <div class="arrow"></div>
+      <div class="step"><span class="ico"><svg><use href="#i-chart"/></svg></span><div><h4>Students explore data</h4><p>Charts, graphs, discovery</p></div></div>
+      <div class="arrow"></div>
+      <div class="step"><span class="ico"><svg><use href="#i-people"/></svg></span><div><h4>Connected learners</h4><p>Peers plus data skills</p></div></div>
+      <div class="arrow dotted"></div>
+      <div class="step risk"><span class="ico risk"><svg><use href="#i-warn"/></svg></span><div><h4>Risk: low engagement</h4><p>Curiosity isn't guaranteed</p></div></div>
+    </section>
+  </div>
+
+  <h2 class="section">System overview</h2>
+  <p class="lead">Data flows from student phones, through a privacy filter, to a central server and a shared dashboard that connects the students.</p>
+
+  <figure>
+    <svg viewBox="0 0 1304 940" role="img" aria-labelledby="sys-t sys-d">
+      <title id="sys-t">System overview of the data science app</title>
+      <desc id="sys-d">Phones in Kenya, the Philippines and Chile send data through a privacy filter to a central server. The server feeds a shared dashboard with bar and scatter charts, which connects students to their peers.</desc>
+
+      <!-- phones -->
+      <g id="phones">
+        <g transform="translate(52 90)"><rect class="d-body" width="102" height="170" rx="14"/><rect class="d-screen" x="12" y="14" width="78" height="112" rx="6"/><circle cx="51" cy="152" r="6" fill="var(--muted)"/></g>
+        <g transform="translate(52 330)"><rect class="d-body" width="102" height="170" rx="14"/><rect class="d-screen" x="12" y="14" width="78" height="112" rx="6"/><circle cx="51" cy="152" r="6" fill="var(--muted)"/></g>
+        <g transform="translate(52 570)"><rect class="d-body" width="102" height="170" rx="14"/><rect class="d-screen" x="12" y="14" width="78" height="112" rx="6"/><circle cx="51" cy="152" r="6" fill="var(--muted)"/></g>
+        <g class="wifi"><path d="M166 98a22 22 0 0 1 22 22M166 84a36 36 0 0 1 36 36"/><path d="M166 338a22 22 0 0 1 22 22M166 324a36 36 0 0 1 36 36"/><path d="M166 578a22 22 0 0 1 22 22M166 564a36 36 0 0 1 36 36"/></g>
+        <text class="d-text" x="103" y="300">Kenya</text><text class="d-text" x="103" y="540">Philippines</text><text class="d-text" x="103" y="780">Chile</text>
+      </g>
+
+      <!-- data paths to filter -->
+      <path class="d-line" d="M154 175C300 175 360 400 410 435"/>
+      <path class="d-line" d="M154 415C250 415 340 430 410 436"/>
+      <path class="d-line" d="M154 655C300 655 360 470 410 440"/>
+
+      <!-- privacy filter (2) -->
+      <path class="d-nf" d="M463 375l50 18v62c0 24-22 42-50 52-28-10-50-28-50-52v-62z"/>
+      <path d="M440 437l17 17 30-34" fill="none" stroke="var(--nf)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text class="d-text" x="463" y="552">Privacy filter</text>
+
+      <!-- arrows -->
+      <path class="d-arrow" d="M517 438H580"/><path class="d-arrowhead" d="M588 438l-14-7v14z"/>
+      <path class="d-arrow" d="M757 438H820"/><path class="d-arrowhead" d="M828 438l-14-7v14z"/>
+
+      <!-- central server (3) -->
+      <g>
+        <rect class="d-body" x="593" y="370" width="160" height="48" rx="6"/><rect class="d-body" x="593" y="422" width="160" height="48" rx="6"/><rect class="d-body" x="593" y="474" width="160" height="48" rx="6"/>
+        <circle class="d-fn-solid" cx="729" cy="394" r="6"/><circle class="d-fn-solid" cx="729" cy="446" r="6"/><circle class="d-fn-solid" cx="729" cy="498" r="6"/>
+        <path d="M613 394h72M613 446h72M613 498h72" stroke="var(--muted)" stroke-width="2"/>
+        <text class="d-text" x="673" y="564">Central server</text>
+      </g>
+
+      <!-- shared dashboard (4, 5) -->
+      <rect x="833" y="250" width="400" height="360" rx="14" fill="var(--bg)" stroke="var(--muted)" stroke-width="2"/>
+      <rect class="d-fn" x="849" y="267" width="368" height="28" rx="6"/>
+      <path d="M857 582h156" stroke="var(--muted)" stroke-width="2"/>
+      <g class="d-fn"><rect x="865" y="503" width="24" height="79" rx="3"/><rect x="901" y="443" width="24" height="139" rx="3"/><rect x="937" y="473" width="24" height="109" rx="3"/><rect x="973" y="403" width="24" height="179" rx="3"/></g>
+      <g class="d-fn-solid"><circle cx="1085" cy="443" r="8"/><circle cx="1133" cy="411" r="8"/><circle cx="1169" cy="423" r="8"/><circle cx="1193" cy="391" r="8"/><circle cx="1145" cy="455" r="8"/><circle cx="1097" cy="491" r="8"/><circle cx="1177" cy="495" r="8"/><circle cx="1123" cy="515" r="8"/><circle cx="1073" cy="535" r="8"/></g>
+      <text class="d-text" x="1032" y="228">Shared dashboard</text>
+
+      <path class="d-arrow" d="M1033 616V690"/><path class="d-arrowhead" d="M1033 700l-7-14h14z"/>
+
+      <!-- connected students (6, 7) -->
+      <g>
+        <g class="d-fn"><circle cx="893" cy="747" r="25"/><circle cx="983" cy="747" r="25"/><circle cx="1073" cy="747" r="25"/><circle cx="1163" cy="747" r="25"/>
+        <rect x="861" y="779" width="64" height="40" rx="20"/><rect x="951" y="779" width="64" height="40" rx="20"/><rect x="1041" y="779" width="64" height="40" rx="20"/><rect x="1131" y="779" width="64" height="40" rx="20"/></g>
+        <path d="M893 819C930 860 1126 860 1163 819M983 819C1000 842 1046 842 1073 819" fill="none" stroke="var(--fn)" stroke-width="3"/>
+        <text class="d-text" x="1027" y="925">Connected students</text>
+      </g>
+
+      <!-- badges -->
+      <g><circle class="d-fn" cx="103" cy="56" r="22"/><text class="badge-t b-fn" x="103" y="57">1</text></g>
+      <g><circle class="d-nf" cx="463" cy="340" r="22"/><text class="badge-t b-nf" x="463" y="341">2</text></g>
+      <g><circle class="d-fn" cx="673" cy="336" r="22"/><text class="badge-t b-fn" x="673" y="337">3</text></g>
+      <g><circle class="d-fn" cx="857" cy="219" r="22"/><text class="badge-t b-fn" x="857" y="220">4</text></g>
+      <g><circle class="d-fn" cx="1209" cy="219" r="22"/><text class="badge-t b-fn" x="1209" y="220">5</text></g>
+      <g><circle class="d-fn" cx="1249" cy="747" r="22"/><text class="badge-t b-fn" x="1249" y="748">6</text></g>
+      <g><circle class="d-risk" cx="1249" cy="811" r="22"/><text class="badge-t b-risk" x="1249" y="812">7</text></g>
+    </svg>
+
+    <ol class="legend" aria-label="Diagram key">
+      <li><span class="num fn">1</span>Collect phone data via app</li>
+      <li><span class="num nf">2</span>Protect privacy, get consent</li>
+      <li><span class="num fn">3</span>Store data centrally</li>
+      <li><span class="num fn">4</span>Shared access for all students</li>
+      <li><span class="num fn">5</span>Explore and chart tools</li>
+      <li><span class="num fn">6</span>Connect students to peers</li>
+      <li><span class="num risk">7</span>Drive engagement (open risk)</li>
+    </ol>
+    <div class="key"><span class="k-fn">Functional</span><span class="k-nf">Non-functional</span><span class="k-risk">Risk</span></div>
+  </figure>
+</main>
+
+<footer>
+  &copy; <span id="year"></span> Capstone8000 &middot;
+  <a href="https://github.com/kisshan2202/capstone8000">View on GitHub</a>
+</footer>
+
+<script>
+  (function () {
+    var bar = document.getElementById("skinbar");
+    function mark() { var c = document.documentElement.getAttribute("data-skin");
+      bar.querySelectorAll(".skin").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.skin === c); }); }
+    bar.addEventListener("click", function (e) {
+      var b = e.target.closest(".skin"); if (!b) return;
+      document.documentElement.setAttribute("data-skin", b.dataset.skin);
+      try { localStorage.setItem("capstone8000-skin", b.dataset.skin); } catch (err) {}
+      mark();
+    });
+    mark();
+    document.getElementById("year").textContent = new Date().getFullYear();
+  })();
+</script>
+</body>
+</html>
