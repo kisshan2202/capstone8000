@@ -27,7 +27,9 @@ existing rules for the rest of the project (the project is shared with other app
     "goal":          { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80" },
     "totalYears":    { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 600" },
     "ts":            { ".validate": "newData.isNumber()" },
-    "skills": { "$i": { "rating": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" } } },
+    "skills": { "$i": {
+      "name":   { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 40" },
+      "rating": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5" } } },
     "$other": { ".validate": true }
   }
 },

@@ -45,7 +45,7 @@
   .ghost { background:var(--surface); color:var(--ink); border:1px solid var(--rule); }
   .danger { background:var(--surface); color:var(--ink); border:1px solid var(--rule); text-decoration:underline; }
   .add-row { display:flex; gap:.5rem; }
-  .add-row select { flex:1; }
+  .add-row input { flex:1; width:auto; min-width:0; }
   .list { display:grid; gap:.5rem; }
   .item { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem .9rem; border:1px solid var(--rule); padding:.55rem .75rem; background:var(--bg); }
   .item .nm { flex:1 1 160px; font-weight:600; overflow-wrap:anywhere; }
@@ -118,10 +118,11 @@
     <fieldset>
       <legend>Skills</legend>
       <div class="add-row">
-        <select id="skill-select" aria-label="Choose a tech skill to add"></select>
+        <input id="skill-select" list="skill-options" maxlength="40" autocomplete="off" placeholder="Pick a suggestion or type your own skill" aria-label="Add a skill: pick a suggestion or type your own">
+        <datalist id="skill-options"></datalist>
         <button type="button" class="ghost" id="skill-add">Add skill</button>
       </div>
-      <p class="hint">Rate each skill from 1 to 5 stars in half-star steps. Click the left half of a star for .5, or use the arrow keys.</p>
+      <p class="hint">Choose a suggestion or type any skill of your own, then press Add (or Enter). Rate each skill from 1 to 5 stars in half-star steps: click the left half of a star for .5, or use the arrow keys.</p>
       <div class="list" id="skills-list" aria-live="polite"></div>
       <p class="empty" id="skills-empty">No skills added yet.</p>
     </fieldset>
@@ -192,11 +193,10 @@ const SKILLS = {
 $("country").insertAdjacentHTML("beforeend", COUNTRIES.map(c => `<option>${c}</option>`).join(""));
 
 const skillSel = $("skill-select");
-function fillSkillSelect() {
-  const taken = new Set(skills.map(s => s.name));
-  skillSel.innerHTML = '<option value="">Select a skill to add…</option>' +
-    Object.entries(SKILLS).map(([g, list]) =>
-      `<optgroup label="${g}">${list.map(n => `<option value="${n}"${taken.has(n) ? " disabled" : ""}>${n}</option>`).join("")}</optgroup>`).join("");
+const ALL_SKILLS = Object.values(SKILLS).flat();
+function fillSkillSelect() {   // suggestions exclude skills already added
+  const taken = new Set(skills.map(x => x.name.toLowerCase()));
+  $("skill-options").innerHTML = ALL_SKILLS.filter(n => !taken.has(n.toLowerCase())).map(n => `<option value="${n}"></option>`).join("");
 }
 
 // ---------- half-star widget (1 to 5, step 0.5) ----------
@@ -246,10 +246,16 @@ function renderSkills() {
   $("skills-empty").hidden = skills.length > 0;
   fillSkillSelect();
 }
-$("skill-add").addEventListener("click", () => {
-  const name = skillSel.value; if (!name) return;
-  skills.push({ name, rating: 3 }); renderSkills();
-});
+function addSkill() {
+  const raw = skillSel.value.trim().replace(/\s+/g, " ");
+  if (!raw) { status("Type a skill or pick one from the suggestions first.", "err"); skillSel.focus(); return; }
+  const name = ALL_SKILLS.find(n => n.toLowerCase() === raw.toLowerCase()) || raw;   // use the listed spelling when it matches
+  if (skills.some(x => x.name.toLowerCase() === name.toLowerCase())) { status(`"${name}" is already in your list.`, "err"); skillSel.select(); return; }
+  if (skills.length >= 30) { status("You can add up to 30 skills.", "err"); return; }
+  skills.push({ name, rating: 3 }); skillSel.value = ""; status(""); renderSkills(); skillSel.focus();
+}
+$("skill-add").addEventListener("click", addSkill);
+skillSel.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } });
 
 // ---------- experience block ----------
 let exps = [];   // [{company, years}]
@@ -315,11 +321,12 @@ function fillForm(d) {
 function fromLegacy(r) {
   const parts = (r.name || "").trim().split(/\s+/), first = parts.shift() || "", last = parts.join(" ");
   const from = (r.from || "").toLowerCase(), country = COUNTRIES.find(c => from.includes(c.toLowerCase())) || "";
-  const ALL = Object.values(SKILLS).flat(), SYN = { "database":"Databases", "ai":"AI Engineering", "ai engineer":"AI Engineering" };
-  const found = [], missed = [];
+  const SYN = { "database":"Databases", "ai":"AI Engineering", "ai engineer":"AI Engineering" };
+  const found = [];
   for (const raw of r.skills || []) {
-    const k = raw.trim().toLowerCase(), hit = ALL.find(n => n.toLowerCase() === (SYN[k] || k).toLowerCase());
-    if (!hit) missed.push(raw.trim()); else if (!found.includes(hit)) found.push(hit);
+    const k = raw.trim().toLowerCase(), hit = ALL_SKILLS.find(n => n.toLowerCase() === (SYN[k] || k).toLowerCase());
+    const name = (hit || raw.trim().replace(/\s+/g, " ")).slice(0, 40);
+    if (name && !found.some(f => f.toLowerCase() === name.toLowerCase())) found.push(name);
   }
   const experience = (r.experience || []).filter(x => x.trim() && !/^total\b/i.test(x.trim())).map(x => {
     const y = /(\d+(?:\.\d+)?)\s*\+?\s*(?:years?|yrs?)/i.exec(x), mo = /(\d+)\s*months?/i.exec(x);
@@ -327,7 +334,7 @@ function fromLegacy(r) {
     return { company: x.trim().slice(0, 80), years: (y || mo) ? yrs : "" };
   });
   return { firstName:first, lastName:last, country, goal:(r.future || r.goal || "").slice(0, 80),
-           skills:found.map(name => ({ name, rating:3 })), experience, hobbies:r.hobbies || [], missed };
+           skills:found.map(name => ({ name, rating:3 })), experience, hobbies:r.hobbies || [] };
 }
 
 async function initMode() {
@@ -342,8 +349,7 @@ async function initMode() {
     if (!raw) { note.textContent = "We couldn't find that profile. Open it with the Edit button on the team page, or fill in the form to add a new one."; return; }
     legacyName = raw.name || ""; const d = fromLegacy(raw); fillForm(d);
     $("save").textContent = "Save profile";
-    note.textContent = "This profile comes from the team file. Check each section, fill in anything missing (for example years at each company, email and date of birth), then save. It moves into the database and replaces the old card."
-      + (d.missed.length ? " Skills that aren't in the list yet: " + d.missed.join(", ") + "." : "");
+    note.textContent = "This profile comes from the team file. Check each section, fill in anything missing (for example years at each company, email and date of birth), then save. It moves into the database and replaces the old card. Skills from the file that aren't in the suggestions were kept as custom skills.";
   } else {
     $("save").textContent = "Save changes";
     $("em-hint").textContent = "Optional. Leave blank to keep what you saved before.";
